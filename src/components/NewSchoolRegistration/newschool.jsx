@@ -45,18 +45,82 @@ const NewAdmissionForm = () => {
   // State for the dialog visibility
   const [openDialog, setOpenDialog] = useState(false);
 
+  const [emailError, setEmailError] = useState(false);
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
   // Handle input change
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
+
+    // Apply different validation rules based on the field
+    if (
+      [
+        "adminName",
+        "schoolName",
+        "schoolState",
+        "schoolCountry",
+        "schoolType",
+        "schoolCity",
+      ].includes(name)
+    ) {
+      // Allow only alphabets and spaces
+      if (/^[a-zA-Z\s]*$/.test(value)) {
+        setFormData((prevData) => ({
+          ...prevData,
+          [name]: value,
+        }));
+      }
+    } else if (
+      [
+        "adminContactNumber",
+        "schoolId",
+        "schoolAdminId",
+        "schoolRegNumber",
+        "schoolLandline",
+        "schoolContactNumber",
+        "schoolPinCode",
+        "schoolBuildingNumber",
+      ].includes(name)
+    ) {
+      // Allow only numbers and restrict to specific length for contact numbers
+      if (/^\d*$/.test(value)) {
+        if (name === "adminContactNumber" || name === "schoolContactNumber") {
+          if (value.length <= 10) {
+            setFormData((prevData) => ({
+              ...prevData,
+              [name]: value,
+            }));
+          }
+        } else {
+          setFormData((prevData) => ({
+            ...prevData,
+            [name]: value,
+          }));
+        }
+      }
+    } else if (name === "adminEmail") {
+      setFormData((prevData) => ({
+        ...prevData,
+        [name]: value,
+      }));
+
+      // Simple email validation
+      setEmailError(!emailRegex.test(value));
+    } else {
+      setFormData((prevData) => ({
+        ...prevData,
+        [name]: value,
+      }));
+    }
   };
 
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (emailError) {
+      alert("Please enter a valid email.");
+      return;
+    }
     setOpenDialog(true); // Open the dialog on submit
   };
 
@@ -151,6 +215,8 @@ const NewAdmissionForm = () => {
                   type="email"
                   value={formData.adminEmail}
                   onChange={handleChange}
+                  error={emailError}
+                  helperText={emailError ? "Enter valid Email Format" : ""}
                 />
               </Stack>
               <Stack direction="row" spacing={3}>
