@@ -128,7 +128,7 @@ const ResponsiveForm = () => {
         sx={{ mt: 4, p: 3, boxShadow: 3, borderRadius: 2 }}
       >
         <Typography variant="h4" gutterBottom>
-          Registration Form
+          User SignUP Form
         </Typography>
         <Box
           component="form"
