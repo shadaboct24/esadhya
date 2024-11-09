@@ -44,6 +44,7 @@ const NewAdmissionForm = () => {
 
   // State for the dialog visibility
   const [openDialog, setOpenDialog] = useState(false);
+  const [formErrors, setFormErrors] = useState({});
 
   const [emailError, setEmailError] = useState(false);
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -114,9 +115,24 @@ const NewAdmissionForm = () => {
     }
   };
 
+  const validateForm = () => {
+    const errors = {};
+    Object.keys(formData).forEach((key) => {
+      if (!formData[key] && !["schoolLandline", "schoolLogo"].includes(key)) {
+        errors[key] = "This field is required";
+      }
+    });
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!validateForm()) {
+      alert("Please fill in all required fields.");
+      return;
+    }
     if (emailError) {
       alert("Please enter a valid email.");
       return;
@@ -189,6 +205,7 @@ const NewAdmissionForm = () => {
           <Box
             component="form"
             noValidate
+            required
             autoComplete="off"
             sx={{ m: 2 }}
             onSubmit={handleSubmit}
@@ -197,7 +214,7 @@ const NewAdmissionForm = () => {
             <Typography variant="h5" gutterBottom>
               Admin Details
             </Typography>
-            <Stack spacing={2}>
+            <Stack spacing={2} required>
               <Stack direction="row" spacing={3}>
                 <TextField
                   required
@@ -391,6 +408,7 @@ const NewAdmissionForm = () => {
               </Stack>
               <Stack direction="row" spacing={3}>
                 <TextField
+                  required
                   fullWidth
                   label="Street"
                   name="schoolStreet"
@@ -398,6 +416,7 @@ const NewAdmissionForm = () => {
                   onChange={handleChange}
                 />
                 <TextField
+                  required
                   fullWidth
                   label="Building Number"
                   name="schoolBuildingNumber"

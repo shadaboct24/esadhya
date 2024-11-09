@@ -16,6 +16,7 @@ import { Link as RouterLink, useNavigate } from "react-router-dom";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import axios from "axios";
+import { API_URL } from "../../Constants/api_url";
 
 const LoginDetails = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -41,7 +42,7 @@ const LoginDetails = () => {
     setError(null);
 
     try {
-      const response = await axios.post("http://localhost:8089/api/login", {
+      const response = await axios.post(`${API_URL}/api/login`, {
         username: email,
         password,
       });
