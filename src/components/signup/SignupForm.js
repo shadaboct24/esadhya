@@ -25,6 +25,9 @@ import {
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { LoadingButton } from "@mui/lab";
+import SendIcon from "@mui/icons-material/Send";
+import OTPInputPopup from "./otppopup";
 
 const ResponsiveForm = () => {
   // State management
@@ -54,6 +57,21 @@ const ResponsiveForm = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordError, setPasswordError] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [sentotp, setsentOtp] = useState(false);
+
+  const [showOtpPopup, setShowOtpPopup] = useState(false);
+
+  function sendotp() {
+    setLoading(true);
+    setsentOtp(false);
+    setShowOtpPopup(true);
+
+    setTimeout(() => {
+      setLoading(false);
+      setsentOtp(true);
+    }, 4000);
+  }
 
   // Handle input change
   const handleInputChange = (e) => {
@@ -74,9 +92,7 @@ const ResponsiveForm = () => {
       alert("Password should match");
       return; // Prevent submission if passwords don't match
     }
-
-    // Show the dialog
-    setOpenDialog(true);
+    setOpenDialog(true); // Show the dialog
   };
 
   // Function to handle actual submission after dialog confirmation
@@ -258,7 +274,24 @@ const ResponsiveForm = () => {
                 fullWidth
                 required
                 onChange={handleInputChange}
+                sx={{ maxWidth: 400 }}
               />
+              <LoadingButton
+                onClick={sendotp}
+                loading={loading}
+                variant="contained"
+                loadingPosition="end"
+                endIcon={!sentotp ? <SendIcon /> : <></>}
+                disabled={sentotp || loading}
+              >
+                {loading ? "Sending..." : sentotp ? "Verified" : "Send OTP"}
+              </LoadingButton>
+              <OTPInputPopup
+                open={showOtpPopup}
+                onClose={() => setShowOtpPopup(false)}
+              />
+            </Stack>
+            <Stack direction="row" spacing={2}>
               <TextField
                 label="Contact Number"
                 name="contactNumber"
@@ -266,7 +299,9 @@ const ResponsiveForm = () => {
                 fullWidth
                 required
                 onChange={handleInputChange}
+                sx={{ maxWidth: 400 }}
               />
+              <Button variant="contained">send otp</Button>
             </Stack>
           </Stack>
 
