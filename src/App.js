@@ -13,10 +13,13 @@ import NewAdmission from "./components/NewSchoolRegistration/newschool";
 import Footer from "./footer";
 import ForgotPassword from "./components/forgotpassword/forgotpassword";
 import UserProfile from "./components/login_logout/UserProfile";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   return (
     <BrowserRouter>
+      <ToastContainer />
       <TopHeader />
       <LogoHeader />
       <Navbar />

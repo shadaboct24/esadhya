@@ -25,9 +25,7 @@ import {
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { LoadingButton } from "@mui/lab";
-import SendIcon from "@mui/icons-material/Send";
-import OTPInputPopup from "./otppopup";
+import OtpPopup from "./otppopup";
 
 const ResponsiveForm = () => {
   // State management
@@ -57,21 +55,21 @@ const ResponsiveForm = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordError, setPasswordError] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [sentotp, setsentOtp] = useState(false);
+  const [sentOtp, setSentOtp] = useState(false);
+  const [verified, setVerified] = useState(false);
 
-  const [showOtpPopup, setShowOtpPopup] = useState(false);
+  const handleSendOtp = () => {
+    setSentOtp(true); // Open the OTP popup
+  };
 
-  function sendotp() {
-    setLoading(true);
-    setsentOtp(false);
-    setShowOtpPopup(true);
+  const handleClosePopup = () => {
+    setSentOtp(false);
+  };
 
-    setTimeout(() => {
-      setLoading(false);
-      setsentOtp(true);
-    }, 4000);
-  }
+  const handleVerificationSuccess = () => {
+    setVerified(true);
+    setSentOtp(false); // Close the OTP popup after successful verification
+  };
 
   // Handle input change
   const handleInputChange = (e) => {
@@ -143,8 +141,8 @@ const ResponsiveForm = () => {
         maxWidth="md"
         sx={{ mt: 4, p: 3, boxShadow: 3, borderRadius: 2 }}
       >
-        <Typography variant="h4" gutterBottom>
-          User SignUP Form
+        <Typography variant="h5" gutterBottom>
+          Signup Form
         </Typography>
         <Box
           component="form"
@@ -239,6 +237,7 @@ const ResponsiveForm = () => {
             <FormControl fullWidth required>
               <InputLabel>Role of Applicant</InputLabel>
               <Select
+                label="Role of applicant" // in the label we can write anything it will prevent line over text
                 name="role"
                 value={formData.role}
                 onChange={handleInputChange}
@@ -276,19 +275,17 @@ const ResponsiveForm = () => {
                 onChange={handleInputChange}
                 sx={{ maxWidth: 400 }}
               />
-              <LoadingButton
-                onClick={sendotp}
-                loading={loading}
+              <Button
                 variant="contained"
-                loadingPosition="end"
-                endIcon={!sentotp ? <SendIcon /> : <></>}
-                disabled={sentotp || loading}
+                disabled={verified}
+                onClick={handleSendOtp}
               >
-                {loading ? "Sending..." : sentotp ? "Verified" : "Send OTP"}
-              </LoadingButton>
-              <OTPInputPopup
-                open={showOtpPopup}
-                onClose={() => setShowOtpPopup(false)}
+                Send OTP
+              </Button>
+              <OtpPopup
+                open={sentOtp}
+                onClose={handleClosePopup}
+                onVerified={handleVerificationSuccess}
               />
             </Stack>
             <Stack direction="row" spacing={2}>
@@ -311,9 +308,10 @@ const ResponsiveForm = () => {
           </Typography>
           <Stack spacing={2}>
             <Stack direction="row" spacing={2}>
-              <FormControl fullWidth required>
+              <FormControl variant="outlined" fullWidth required>
                 <InputLabel>School</InputLabel>
                 <Select
+                  label="School"
                   name="schoolSelected"
                   value={formData.schoolSelected}
                   onChange={handleInputChange}
