@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { toast } from "react-toastify";
 import {
   Container,
   TextField,
@@ -26,6 +27,8 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import OtpPopup from "./otppopup";
+import LoadingButton from "@mui/lab/LoadingButton";
+import { API_URL } from "../../Constants/api_url";
 
 const ResponsiveForm = () => {
   // State management
@@ -52,23 +55,127 @@ const ResponsiveForm = () => {
     address: "",
   });
 
-  const [openDialog, setOpenDialog] = useState(false);
+  const [openDialog, setOpenDialog] = useState(false); // confirm submission dialogue
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordError, setPasswordError] = useState(false);
+
+  // these are for enabling and diabling otp
   const [sentOtp, setSentOtp] = useState(false);
   const [verified, setVerified] = useState(false);
+  const [loading, setLoading] = React.useState(false);
+  const [emailotp, setEmailOtp] = useState("");
 
   const handleSendOtp = () => {
-    setSentOtp(true); // Open the OTP popup
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Basic email validation regex
+
+    // Check if email is entered
+    if (!formData.email) {
+      alert("Please enter an email address.");
+      return;
+    }
+    // Validate email format
+    if (!emailPattern.test(formData.email)) {
+      alert("Please enter a valid email address.");
+      return;
+    }
+    // setSentOtp(true);
+    setLoading(true);
+
+    let data = {
+      email: formData.email,
+    };
+
+    let config = {
+      method: "post",
+      maxBodyLength: Infinity,
+      url: `${API_URL}/api/otp/generate`,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: JSON.stringify(data),
+    };
+
+    if (!loading) {
+      axios
+        .request(config)
+        .then((response) => {
+          //console.log("Response received:", response);
+          if (response.data === true) {
+            toast.success("Success! Verification Code is sent .", {
+              position: "top-right",
+              autoClose: 5000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+              theme: "colored",
+            });
+            setSentOtp(true);
+            setLoading(false);
+          }
+        })
+        .catch((error) => {
+          toast.error("Error! " + error.response.data.error_message, {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored",
+          });
+          setLoading(false);
+        });
+    }
   };
 
-  const handleClosePopup = () => {
-    setSentOtp(false);
-  };
+  const verifyEmail = () => {
+    let data = {
+      email: formData.email,
+      otp: emailotp,
+    };
 
-  const handleVerificationSuccess = () => {
-    setVerified(true);
-    setSentOtp(false); // Close the OTP popup after successful verification
+    let config = {
+      method: "post",
+      maxBodyLength: Infinity,
+      url: `${API_URL}/api/otp/validate`,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: JSON.stringify(data),
+    };
+    console.log("otp is", emailotp);
+    axios
+      .request(config)
+      .then((response) => {
+        if (response.data === true) {
+          toast.success("Success! Your Email Verified ", {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored",
+          });
+          setVerified(true);
+        }
+      })
+      .catch((error) => {
+        toast.error(error.response.data.error_message, {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        });
+      });
   };
 
   // Handle input change
@@ -275,19 +382,54 @@ const ResponsiveForm = () => {
                 onChange={handleInputChange}
                 sx={{ maxWidth: 400 }}
               />
-              <Button
+              {/* <Button
                 variant="contained"
                 disabled={verified}
                 onClick={handleSendOtp}
               >
                 Send OTP
-              </Button>
-              <OtpPopup
+              </Button> */}
+              <LoadingButton
+                onClick={handleSendOtp}
+                loading={loading}
+                variant="contained"
+                disabled={verified || sentOtp}
+              >
+                send OTP
+              </LoadingButton>
+              {/* this otppopup for sending otp  */}
+              {/* <OtpPopup
                 open={sentOtp}
                 onClose={handleClosePopup}
                 onVerified={handleVerificationSuccess}
-              />
+                email1={formData.email}
+              /> */}
             </Stack>
+            {sentOtp && !verified && (
+              <Stack direction="row" spacing={2}>
+                <TextField
+                  label="Enter OTP"
+                  name="otpnumber"
+                  variant="outlined"
+                  fullWidth
+                  required
+                  onChange={(e) => {
+                    const input = e.target.value.replace(/\D/g, "");
+                    setEmailOtp(input);
+                  }}
+                  value={emailotp}
+                  sx={{ maxWidth: 400 }}
+                />
+                <Button
+                  variant="contained"
+                  disabled={verified}
+                  onClick={verifyEmail}
+                >
+                  Verify OTP
+                </Button>
+              </Stack>
+            )}
+
             <Stack direction="row" spacing={2}>
               <TextField
                 label="Contact Number"

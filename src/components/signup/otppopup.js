@@ -10,47 +10,73 @@ import {
 } from "@mui/material";
 import React, { useState, useEffect, useRef } from "react";
 import { toast } from "react-toastify";
+import axios from "axios";
 
-export default function OtpPopup({ open, onClose, onVerified }) {
+export default function OtpPopup({ open, onClose, onVerified, email1 }) {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
-  const [generatedOtp, setGeneratedOtp] = useState("");
   const [timer, setTimer] = useState(60); // Countdown timer for OTP expiration
   const [isRequestDisabled, setIsRequestDisabled] = useState(false); // Disable Request Again button
   const inputRefs = useRef([]); // Array of refs for each OTP input field
 
-  // Function to generate a new OTP and reset states
-  const generateOtp = () => {
-    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-    setGeneratedOtp(otpCode);
-    console.log("Generated OTP:", otpCode);
-    setOtp(["", "", "", "", "", ""]);
-    setTimer(60);
-    setIsRequestDisabled(true); // Disable the request button for 60 seconds
+  // Function to generate a new OTP
+  const generateOtp = async () => {
+    if (!email1) {
+      toast.error("Email is required to send OTP.", { position: "top-right" });
+      return;
+    }
 
-    // Show toast notification
-    toast.info("OTP sent to your mobile number!", {
-      position: "top-right",
-      autoClose: 2000,
-      hideProgressBar: true,
-    });
+    try {
+      const response = await axios.post(
+        "http://localhost:8082/api/otp/generate",
+        { email: email1 }
+      );
+      toast.info(response.data || "OTP sent to your email.", {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: true,
+      });
+      setOtp(["", "", "", "", "", ""]);
+      setTimer(60);
+      setIsRequestDisabled(true);
+    } catch (error) {
+      toast.error(
+        error.response?.data || "Failed to send OTP. Please try again.",
+        { position: "top-right" }
+      );
+    }
   };
 
-  // Generate OTP when the modal opens
-  useEffect(() => {
-    if (open) {
-      generateOtp(); // Generate an OTP when the popup opens
+  // Verify OTP
+  const handleVerifyOtp = async () => {
+    const enteredOtp = otp.join("");
+    if (enteredOtp.length !== 6) {
+      toast.error("Please enter a 6-digit OTP.", { position: "top-right" });
+      return;
     }
-  }, [open]);
 
-  // Countdown timer logic
-  useEffect(() => {
-    if (timer > 0) {
-      const interval = setInterval(() => setTimer((prev) => prev - 1), 1000);
-      return () => clearInterval(interval);
-    } else {
-      setIsRequestDisabled(false); // Enable the request button after 60 seconds
+    try {
+      const response = await axios.post(
+        "http://localhost:8082/api/otp/validate",
+        { email: email1, otp: enteredOtp }
+      );
+      const message = response.data;
+
+      if (message.includes("valid")) {
+        toast.success("OTP verified successfully!", {
+          position: "top-right",
+          autoClose: 2000,
+        });
+        onVerified();
+      } else {
+        toast.error(message, { position: "top-right", autoClose: 2000 });
+      }
+    } catch (error) {
+      toast.error(
+        error.response?.data || "Failed to verify OTP. Please try again.",
+        { position: "top-right" }
+      );
     }
-  }, [timer]);
+  };
 
   // Handle OTP input changes
   const handleOtpChange = (value, index) => {
@@ -64,25 +90,22 @@ export default function OtpPopup({ open, onClose, onVerified }) {
     }
   };
 
-  // Verify OTP
-  const handleVerifyOtp = () => {
-    const enteredOtp = otp.join("");
-    if (enteredOtp === generatedOtp) {
-      toast.success("OTP verified successfully!", {
-        position: "top-right",
-        autoClose: 2000,
-        hideProgressBar: true,
-        style: { backgroundColor: "green", color: "white" },
-      });
-      onVerified();
+  // Countdown timer logic
+  useEffect(() => {
+    if (timer > 0) {
+      const interval = setInterval(() => setTimer((prev) => prev - 1), 1000);
+      return () => clearInterval(interval);
     } else {
-      toast.error("Incorrect OTP, please try again.", {
-        position: "top-right",
-        autoClose: 2000,
-        hideProgressBar: true,
-      });
+      setIsRequestDisabled(false); // Enable the request button after 60 seconds
     }
-  };
+  }, [timer]);
+
+  // Generate OTP when the modal opens
+  useEffect(() => {
+    if (open) {
+      generateOtp();
+    }
+  }, [open]);
 
   // Clear OTP fields
   const handleClearOtp = () => setOtp(["", "", "", "", "", ""]);
@@ -109,7 +132,7 @@ export default function OtpPopup({ open, onClose, onVerified }) {
           Verify OTP
         </Typography>
         <Typography variant="body2" color="text.secondary" mb={2}>
-          OTP is sent to your Mobile Number: XXXXXX5077
+          OTP is sent to your email: {email1}
         </Typography>
 
         {/* OTP Input Fields */}
