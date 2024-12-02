@@ -22,6 +22,7 @@ import {
   DialogContentText,
   DialogTitle,
   Box,
+  FormHelperText,
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -32,6 +33,7 @@ import { API_URL } from "../../Constants/api_url";
 
 const ResponsiveForm = () => {
   // State management
+
   const [formData, setFormData] = useState({
     fullName: "",
     username: "",
@@ -55,9 +57,110 @@ const ResponsiveForm = () => {
     address: "",
   });
 
+  const validateForm = () => {
+    const errors = {};
+
+    if (!formData.fullName.trim()) {
+      errors.fullName = "Full Name is required.";
+    }
+
+    if (!formData.username.trim()) {
+      errors.username = "Username is required.";
+    } else if (formData.username.length < 5) {
+      errors.username = "Username must be at least 5 characters.";
+    }
+
+    if (!formData.password.trim()) {
+      errors.password = "Password is required.";
+    } else if (formData.password.length < 8) {
+      errors.password = "Password must be at least 8 characters.";
+    }
+
+    if (!formData.gender) {
+      errors.gender = "Gender is required.";
+    }
+
+    if (!formData.dob) {
+      errors.dob = "Date of Birth is required.";
+    } else {
+      const today = new Date();
+      const selectedDate = new Date(formData.dob);
+      if (selectedDate >= today) {
+        errors.dob = "Date of Birth must be in the past.";
+      }
+    }
+
+    if (!formData.role.trim()) {
+      errors.role = "Role is required.";
+    }
+
+    if (!formData.occupation.trim()) {
+      errors.occupation = "Occupation is required.";
+    }
+
+    if (!formData.email.trim()) {
+      errors.email = "Email is required.";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      errors.email = "Email is not valid.";
+    }
+
+    if (!formData.contactNumber.trim()) {
+      errors.contactNumber = "Contact Number is required.";
+    } else if (!/^\d{10}$/.test(formData.contactNumber)) {
+      errors.contactNumber = "Contact Number must be 10 digits.";
+    }
+
+    if (!formData.schoolSelected.trim()) {
+      errors.schoolSelected = "School selection is required.";
+    }
+
+    if (!formData.schoolRegNumber.trim()) {
+      errors.schoolRegNumber = "School Registration Number is required.";
+    }
+
+    if (!formData.schoolPasscode.trim()) {
+      errors.schoolPasscode = "School Passcode is required.";
+    }
+
+    if (!formData.country.trim()) {
+      errors.country = "Country is required.";
+    }
+
+    if (!formData.state.trim()) {
+      errors.state = "State is required.";
+    }
+
+    if (!formData.district.trim()) {
+      errors.district = "District is required.";
+    }
+
+    if (!formData.belonging.trim()) {
+      errors.belonging = "Belongs to city or mandal is required.";
+    }
+
+    if (!formData.cityOrMandal.trim()) {
+      errors.cityOrMandal = "City or Mandal is required.";
+    }
+
+    if (!formData.street.trim()) {
+      errors.street = "Street is required.";
+    }
+
+    if (!formData.houseNo.trim()) {
+      errors.houseNo = "House Number is required.";
+    }
+
+    if (!formData.address.trim()) {
+      errors.address = "Address is required.";
+    }
+
+    return errors;
+  };
+
   const [openDialog, setOpenDialog] = useState(false); // confirm submission dialogue
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [passwordError, setPasswordError] = useState(false);
+
+  const [formerrors, setFormerrors] = useState({});
 
   // these are for enabling and diabling otp
   const [sentOtp, setSentOtp] = useState(false);
@@ -116,7 +219,8 @@ const ResponsiveForm = () => {
           }
         })
         .catch((error) => {
-          toast.error("Error! " + error.response.data.error_message, {
+          const errormessage = error?.response?.data || "An Error";
+          toast.error("Error! " + errormessage, {
             position: "top-right",
             autoClose: 5000,
             hideProgressBar: false,
@@ -146,7 +250,7 @@ const ResponsiveForm = () => {
       },
       data: JSON.stringify(data),
     };
-    console.log("otp is", emailotp);
+    // console.log("otp is", emailotp);
     axios
       .request(config)
       .then((response) => {
@@ -165,7 +269,8 @@ const ResponsiveForm = () => {
         }
       })
       .catch((error) => {
-        toast.error(error.response.data.error_message, {
+        const errormessage = error?.response?.data || "An Error";
+        toast.error("Error! " + errormessage, {
           position: "top-right",
           autoClose: 5000,
           hideProgressBar: false,
@@ -183,19 +288,33 @@ const ResponsiveForm = () => {
     const { name, value } = e.target;
     if (name === "confirmPassword") {
       setConfirmPassword(value);
-      setPasswordError(formData.password !== value); // Set error if passwords don’t match
+      //setPasswordError(formData.password !== value); // Set error if passwords don’t match
     } else {
       setFormData((prevData) => ({ ...prevData, [name]: value }));
     }
+
+    setFormerrors((prevErrors) => ({ ...prevErrors, [name]: "" }));
   };
 
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const errors = validateForm();
 
-    if (passwordError) {
+    if (Object.keys(errors).length > 0) {
+      setFormerrors(errors);
+      alert("Please complete the required fields");
+      return;
+    }
+
+    if (formData.password !== confirmPassword) {
       alert("Password should match");
       return; // Prevent submission if passwords don't match
+    }
+
+    if (!verified) {
+      alert("email is not verfied");
+      return;
     }
     setOpenDialog(true); // Show the dialog
   };
@@ -204,42 +323,64 @@ const ResponsiveForm = () => {
   const confirmSubmit = async () => {
     console.log("before submission", formData);
     try {
-      const response = await axios.post("http://localhost:8089/registeruser", {
+      const response = await axios.post("http://localhost:8082/registeruser", {
         ...formData,
         password: formData.password, // Only send the password
       });
 
       console.log("Response:", response.data);
 
-      // Reset the form
-      setFormData({
-        fullName: "",
-        username: "",
-        password: "",
-        gender: "",
-        dob: null,
-        role: "",
-        occupation: "",
-        email: "",
-        contactNumber: "",
-        schoolSelected: "",
-        schoolRegNumber: "",
-        schoolPasscode: "",
-        country: "",
-        state: "",
-        district: "",
-        belonging: "",
-        cityOrMandal: "",
-        street: "",
-        houseNo: "",
-        address: "",
+      toast.success("Registration Successful!", {
+        position: "top-right",
+        autoClose: 3000,
       });
-      setConfirmPassword(""); // Clear confirm password as well
+      // Reset the form
+      resetForm();
+
+      setOpenDialog(false);
+      // setConfirmPassword("");
     } catch (error) {
       console.error("Error:", error);
+
+      toast.error("Registration Failed. Please try again.", {
+        position: "top-right",
+        autoClose: 3000,
+      });
     }
+
     // Close the dialog after submission
-    setOpenDialog(false);
+    // setOpenDialog(false);
+  };
+
+  const resetForm = () => {
+    setFormData({
+      fullName: "",
+      username: "",
+      password: "",
+      gender: "",
+      dob: null,
+      role: "",
+      occupation: "",
+      email: "",
+      contactNumber: "",
+      schoolSelected: "",
+      schoolRegNumber: "",
+      schoolPasscode: "",
+      country: "",
+      state: "",
+      district: "",
+      belonging: "",
+      cityOrMandal: "",
+      street: "",
+      houseNo: "",
+      address: "",
+    });
+    setConfirmPassword("");
+    setSentOtp(false);
+    setEmailOtp("");
+    setLoading(false);
+    setVerified(false);
+    setFormerrors({});
   };
 
   return (
@@ -270,7 +411,10 @@ const ResponsiveForm = () => {
                 variant="outlined"
                 fullWidth
                 required
+                value={formData.fullName}
                 onChange={handleInputChange}
+                helperText={formerrors.fullName}
+                error={!!formerrors.fullName}
               />
               <TextField
                 label="Username"
@@ -278,7 +422,10 @@ const ResponsiveForm = () => {
                 variant="outlined"
                 fullWidth
                 required
+                value={formData.username}
                 onChange={handleInputChange}
+                helperText={formerrors.username}
+                error={!!formerrors.username}
               />
             </Stack>
             <Stack direction="row" spacing={2}>
@@ -289,7 +436,10 @@ const ResponsiveForm = () => {
                 variant="outlined"
                 fullWidth
                 required
+                value={formData.password}
                 onChange={handleInputChange}
+                helperText={formerrors.password}
+                error={!!formerrors.password}
               />
               <TextField
                 label="Confirm Password"
@@ -300,14 +450,27 @@ const ResponsiveForm = () => {
                 required
                 onChange={handleInputChange}
                 value={confirmPassword}
-                error={passwordError}
-                helperText={passwordError ? "Passwords do not match" : ""}
+                error={formData.password !== confirmPassword}
+                helperText={
+                  formData.password !== confirmPassword
+                    ? "Passwords do not match"
+                    : ""
+                }
               />
             </Stack>
             <Stack direction="row" spacing={2} sx={{ width: "100%" }}>
-              <FormControl sx={{ flex: 1 }} required>
+              <FormControl
+                sx={{ flex: 1 }}
+                required
+                error={!!formerrors.gender}
+              >
                 <FormLabel>Gender</FormLabel>
-                <RadioGroup row name="gender" onChange={handleInputChange}>
+                <RadioGroup
+                  row
+                  name="gender"
+                  value={formData.gender}
+                  onChange={handleInputChange}
+                >
                   <FormControlLabel
                     value="male"
                     control={<Radio />}
@@ -324,6 +487,7 @@ const ResponsiveForm = () => {
                     label="Other"
                   />
                 </RadioGroup>
+                <FormHelperText>{formerrors.gender}</FormHelperText>
               </FormControl>
 
               <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -333,15 +497,21 @@ const ResponsiveForm = () => {
                   onChange={(newValue) =>
                     setFormData((prevData) => ({ ...prevData, dob: newValue }))
                   }
-                  TextFiledComponent={(params) => (
-                    <TextField {...params} fullWidth required />
-                  )}
+                  slotProps={{
+                    textField: {
+                      value: formData.dob,
+                      error: !!formerrors.dob,
+                      helperText: formerrors.dob,
+                      fullWidth: true,
+                      required: true,
+                    },
+                  }}
                   sx={{ flex: 1 }} // This ensures the date picker scales properly with other fields
                 />
               </LocalizationProvider>
             </Stack>
 
-            <FormControl fullWidth required>
+            <FormControl fullWidth required error={!!formerrors.role}>
               <InputLabel>Role of Applicant</InputLabel>
               <Select
                 label="Role of applicant" // in the label we can write anything it will prevent line over text
@@ -356,6 +526,7 @@ const ResponsiveForm = () => {
                 <MenuItem value="ClinicalA">Clinical Assistant</MenuItem>
                 <MenuItem value="Sclp">School Parent</MenuItem>
               </Select>
+              <FormHelperText>{formerrors.role}</FormHelperText>
             </FormControl>
             <TextField
               label="Occupation"
@@ -363,7 +534,10 @@ const ResponsiveForm = () => {
               variant="outlined"
               fullWidth
               required
+              value={formData.occupation}
               onChange={handleInputChange}
+              helperText={formerrors.occupation}
+              error={!!formerrors.occupation}
             />
           </Stack>
 
@@ -379,8 +553,12 @@ const ResponsiveForm = () => {
                 variant="outlined"
                 fullWidth
                 required
+                value={formData.email}
+                disabled={verified}
                 onChange={handleInputChange}
                 sx={{ maxWidth: 400 }}
+                helperText={formerrors.email}
+                error={!!formerrors.email}
               />
               {/* <Button
                 variant="contained"
@@ -437,8 +615,11 @@ const ResponsiveForm = () => {
                 variant="outlined"
                 fullWidth
                 required
+                value={formData.contactNumber}
                 onChange={handleInputChange}
                 sx={{ maxWidth: 400 }}
+                helperText={formerrors.contactNumber}
+                error={!!formerrors.contactNumber}
               />
               <Button variant="contained">send otp</Button>
             </Stack>
@@ -450,7 +631,12 @@ const ResponsiveForm = () => {
           </Typography>
           <Stack spacing={2}>
             <Stack direction="row" spacing={2}>
-              <FormControl variant="outlined" fullWidth required>
+              <FormControl
+                variant="outlined"
+                fullWidth
+                required
+                error={!!formerrors.schoolSelected}
+              >
                 <InputLabel>School</InputLabel>
                 <Select
                   label="School"
@@ -465,6 +651,7 @@ const ResponsiveForm = () => {
                   <MenuItem value="school2">KV Mahadevapura</MenuItem>
                   <MenuItem value="school3">JNV Mandya</MenuItem>
                 </Select>
+                <FormHelperText>{formerrors.schoolSelected}</FormHelperText>
               </FormControl>
               <TextField
                 label="School Registration Number"
@@ -472,7 +659,10 @@ const ResponsiveForm = () => {
                 variant="outlined"
                 fullWidth
                 required
+                value={formData.schoolRegNumber}
                 onChange={handleInputChange}
+                helperText={formerrors.schoolRegNumber}
+                error={!!formerrors.schoolRegNumber}
               />
             </Stack>
             <TextField
@@ -481,8 +671,11 @@ const ResponsiveForm = () => {
               variant="outlined"
               fullWidth
               required
+              value={formData.schoolPasscode}
               disabled={!formData.schoolSelected}
               onChange={handleInputChange}
+              helperText={formerrors.schoolPasscode}
+              error={!!formerrors.schoolPasscode}
             />
           </Stack>
 
@@ -498,7 +691,10 @@ const ResponsiveForm = () => {
                 variant="outlined"
                 fullWidth
                 required
+                value={formData.country}
                 onChange={handleInputChange}
+                helperText={formerrors.country}
+                error={!!formerrors.country}
               />
               <TextField
                 label="State"
@@ -506,7 +702,10 @@ const ResponsiveForm = () => {
                 variant="outlined"
                 fullWidth
                 required
+                value={formData.state}
                 onChange={handleInputChange}
+                helperText={formerrors.state}
+                error={!!formerrors.state}
               />
               <TextField
                 label="District"
@@ -514,10 +713,13 @@ const ResponsiveForm = () => {
                 variant="outlined"
                 fullWidth
                 required
+                value={formData.district}
                 onChange={handleInputChange}
+                helperText={formerrors.district}
+                error={!!formerrors.district}
               />
             </Stack>
-            <FormControl required>
+            <FormControl required error={formerrors.belonging}>
               <FormLabel>You Are Belonging To</FormLabel>
               <RadioGroup
                 row
@@ -536,6 +738,7 @@ const ResponsiveForm = () => {
                   label="Mandal"
                 />
               </RadioGroup>
+              <FormHelperText>{formerrors.belonging}</FormHelperText>
             </FormControl>
             <Stack direction="row" spacing={2}>
               <TextField
@@ -544,7 +747,10 @@ const ResponsiveForm = () => {
                 variant="outlined"
                 fullWidth
                 required
+                value={formData.cityOrMandal}
                 onChange={handleInputChange}
+                helperText={formerrors.cityOrMandal}
+                error={!!formerrors.cityOrMandal}
               />
               <TextField
                 label="Street"
@@ -552,7 +758,10 @@ const ResponsiveForm = () => {
                 variant="outlined"
                 fullWidth
                 required
+                value={formData.street}
                 onChange={handleInputChange}
+                helperText={formerrors.street}
+                error={!!formerrors.street}
               />
               <TextField
                 label="House No"
@@ -560,7 +769,10 @@ const ResponsiveForm = () => {
                 variant="outlined"
                 fullWidth
                 required
+                value={formData.houseNo}
                 onChange={handleInputChange}
+                helperText={formerrors.houseNo}
+                error={!!formerrors.houseNo}
               />
             </Stack>
             <TextField
@@ -569,7 +781,10 @@ const ResponsiveForm = () => {
               variant="outlined"
               fullWidth
               required
+              value={formData.address}
               onChange={handleInputChange}
+              helperText={formerrors.address}
+              error={!!formerrors.address}
             />
           </Stack>
 
@@ -580,6 +795,7 @@ const ResponsiveForm = () => {
             color="primary"
             fullWidth
             sx={{ mt: 3 }}
+            onClick={handleSubmit}
           >
             Submit
           </Button>

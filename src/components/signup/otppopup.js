@@ -102,17 +102,17 @@ export default function OtpPopup({ open, onClose, onVerified, email1 }) {
 
   // Generate OTP when the modal opens
   useEffect(() => {
-    if (open) {
+    if (true) {
       generateOtp();
     }
-  }, [open]);
+  }, [true]);
 
   // Clear OTP fields
   const handleClearOtp = () => setOtp(["", "", "", "", "", ""]);
 
   return (
     <Modal
-      open={open}
+      open={true}
       onClose={(e, reason) => reason === "backdropClick" && e.stopPropagation()}
     >
       <Box
