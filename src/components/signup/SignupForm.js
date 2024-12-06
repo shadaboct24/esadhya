@@ -323,7 +323,7 @@ const ResponsiveForm = () => {
   const confirmSubmit = async () => {
     console.log("before submission", formData);
     try {
-      const response = await axios.post("http://localhost:8082/registeruser", {
+      const response = await axios.post(`${API_URL}/registeruser`, {
         ...formData,
         password: formData.password, // Only send the password
       });
