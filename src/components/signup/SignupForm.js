@@ -27,7 +27,6 @@ import {
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import OtpPopup from "./otppopup";
 import LoadingButton from "@mui/lab/LoadingButton";
 import { API_URL } from "../../Constants/api_url";
 
@@ -168,6 +167,12 @@ const ResponsiveForm = () => {
   const [loading, setLoading] = React.useState(false);
   const [emailotp, setEmailOtp] = useState("");
 
+  //states for mobile otp
+  const [sentOtpSMS, setSentOtpSMS] = useState(false);
+  const [verifiedSMS, setVerifiedSMS] = useState(false);
+  const [loadingSMS, setLoadingSMS] = React.useState(false);
+  const [smsotp, setSmsOtp] = useState("");
+
   const handleSendOtp = () => {
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Basic email validation regex
 
@@ -266,6 +271,119 @@ const ResponsiveForm = () => {
             theme: "colored",
           });
           setVerified(true);
+        }
+      })
+      .catch((error) => {
+        const errormessage = error?.response?.data || "An Error";
+        toast.error("Error! " + errormessage, {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        });
+      });
+  };
+
+  const handleSmsOtp = () => {
+    const phoneregx = /^[0-9]{10}$/;
+
+    if (!formData.contactNumber) {
+      alert("Please enter mobile number first");
+      return;
+    }
+
+    if (!phoneregx.test(formData.contactNumber)) {
+      alert("Enter a valid phone number");
+      return;
+    }
+
+    setLoadingSMS(true);
+
+    let data = {
+      phoneNumber: formData.contactNumber,
+    };
+
+    let config = {
+      method: "post",
+      maxBodyLength: Infinity,
+      url: `${API_URL}/sendmobileotp`,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: JSON.stringify(data),
+    };
+
+    if (!loadingSMS) {
+      axios
+        .request(config)
+        .then((response) => {
+          if (response.data === true) {
+            toast.success("Success! Verification Code is sent .", {
+              position: "top-right",
+              autoClose: 5000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+              theme: "colored",
+            });
+            setSentOtpSMS(true);
+            setLoadingSMS(false);
+          }
+        })
+        .catch((error) => {
+          const errormessage = error?.response?.data || "An Error";
+          toast.error("Error! " + errormessage, {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored",
+          });
+          setLoadingSMS(false);
+        });
+    }
+  };
+
+  const verifySmsOtp = () => {
+    let data = {
+      phoneNumber: formData.contactNumber,
+      otp: smsotp,
+    };
+
+    let config = {
+      method: "post",
+      maxBodyLength: Infinity,
+      url: `${API_URL}/mobileotpvalidate`,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: JSON.stringify(data),
+    };
+
+    axios
+      .request(config)
+      .then((response) => {
+        if (response.data === true) {
+          toast.success("Success! Your Number Verified ", {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored",
+          });
+          setVerifiedSMS(true);
         }
       })
       .catch((error) => {
@@ -621,8 +739,39 @@ const ResponsiveForm = () => {
                 helperText={formerrors.contactNumber}
                 error={!!formerrors.contactNumber}
               />
-              <Button variant="contained">send otp</Button>
+              <LoadingButton
+                onClick={handleSmsOtp}
+                loading={loadingSMS}
+                variant="contained"
+                disabled={verifiedSMS || sentOtpSMS}
+              >
+                send OTP
+              </LoadingButton>
             </Stack>
+            {sentOtpSMS && !verifiedSMS && (
+              <Stack direction="row" spacing={2}>
+                <TextField
+                  label="Enter OTP"
+                  name="otpnumber"
+                  variant="outlined"
+                  fullWidth
+                  required
+                  onChange={(e) => {
+                    const input = e.target.value.replace(/\D/g, "");
+                    setSmsOtp(input);
+                  }}
+                  value={smsotp}
+                  sx={{ maxWidth: 400 }}
+                />
+                <Button
+                  variant="contained"
+                  disabled={verifiedSMS}
+                  onClick={verifySmsOtp}
+                >
+                  Verify OTP
+                </Button>
+              </Stack>
+            )}
           </Stack>
 
           {/* School Details Section */}

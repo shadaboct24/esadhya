@@ -21,7 +21,6 @@ import {
 import axios from "axios";
 import { API_URL } from "../../Constants/api_url";
 import { toast } from "react-toastify";
-import { FormatBoldTwoTone } from "@mui/icons-material";
 
 const NewAdmissionForm = () => {
   const [locations, setLocations] = useState([]);
@@ -288,7 +287,10 @@ const NewAdmissionForm = () => {
   const handleDialogConfirm = async () => {
     console.log("befre Submission", formData);
     try {
-      const response = await axios.post(`${API_URL}/registerschool`, formData);
+      const response = await axios.post(
+        `${API_URL}/registernewschool`,
+        formData
+      );
 
       toast.success("Registration Successful!", {
         position: "top-right",
