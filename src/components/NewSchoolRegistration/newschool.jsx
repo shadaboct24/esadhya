@@ -476,22 +476,109 @@ const NewAdmissionForm = () => {
                 <TextField
                   required
                   fullWidth
-                  label="School Admin ID"
-                  name="schoolAdminId"
-                  value={formData.schoolAdminId}
+                  label="Registration Number"
+                  name="schoolRegNumber"
+                  value={formData.schoolRegNumber}
                   onChange={handleChange}
-                  error={!!formErrors.schoolAdminId}
-                  helperText={formErrors.schoolAdminId}
+                  error={!!formErrors.schoolRegNumber}
+                  helperText={formErrors.schoolRegNumber}
                 />
                 <TextField
                   required
                   fullWidth
-                  label="School Address"
-                  name="schoolAddress"
-                  value={formData.schoolAddress}
+                  label="School Passcode"
+                  name="schoolPasscode"
+                  type="password"
+                  value={formData.schoolPasscode}
                   onChange={handleChange}
-                  error={!!formErrors.schoolAddress}
-                  helperText={formErrors.schoolAddress}
+                  error={!!formErrors.schoolPasscode}
+                  helperText={formErrors.schoolPasscode}
+                />
+              </Stack>
+              <Stack direction="row" spacing={3}>
+                <TextField
+                  required
+                  fullWidth
+                  label="School Type"
+                  name="schoolType"
+                  value={formData.schoolType}
+                  onChange={handleChange}
+                  error={!!formErrors.schoolType}
+                  helperText={formErrors.schoolType}
+                />
+                <TextField
+                  fullWidth
+                  label="School Logo (URL)"
+                  name="schoolLogo"
+                  value={formData.schoolLogo}
+                  onChange={handleChange}
+                  error={!!formErrors.schoolLogo}
+                  helperText={formErrors.schoolLogo}
+                />
+              </Stack>
+              <Stack direction="row" spacing={3}>
+                <TextField
+                  fullWidth
+                  label="School Landline"
+                  name="schoolLandline"
+                  value={formData.schoolLandline}
+                  onChange={handleChange}
+                  error={!!formErrors.schoolLandline}
+                  helperText={formErrors.schoolLandline}
+                />
+                <TextField
+                  required
+                  fullWidth
+                  label="Contact Number"
+                  name="schoolContactNumber"
+                  value={formData.schoolContactNumber}
+                  onChange={handleChange}
+                  error={!!formErrors.schoolContactNumber}
+                  helperText={formErrors.schoolContactNumber}
+                />
+              </Stack>
+              <Stack direction="row" spacing={3}>
+                <TextField
+                  required
+                  fullWidth
+                  label="Building Number"
+                  name="schoolBuildingNumber"
+                  value={formData.schoolBuildingNumber}
+                  onChange={handleChange}
+                  error={!!formErrors.schoolBuildingNumber}
+                  helperText={formErrors.schoolBuildingNumber}
+                />
+                <TextField
+                  required
+                  fullWidth
+                  label="Street"
+                  name="schoolStreet"
+                  value={formData.schoolStreet}
+                  onChange={handleChange}
+                  error={!!formErrors.schoolStreet}
+                  helperText={formErrors.schoolStreet}
+                />
+              </Stack>
+              <Stack direction="row" spacing={3}>
+                <TextField
+                  required
+                  fullWidth
+                  label="Enter city/ Mandal"
+                  name="schoolCityOrMandal"
+                  value={formData.schoolCityOrMandal}
+                  onChange={handleChange}
+                  error={!!formErrors.schoolCityOrMandal}
+                  helperText={formErrors.schoolCityOrMandal}
+                />
+                <TextField
+                  required
+                  fullWidth
+                  label="Pin Code"
+                  name="schoolPinCode"
+                  value={formData.schoolPinCode}
+                  onChange={handleChange}
+                  error={!!formErrors.schoolPinCode}
+                  helperText={formErrors.schoolPinCode}
                 />
               </Stack>
               <Stack direction="row" spacing={3}>
@@ -553,109 +640,12 @@ const NewAdmissionForm = () => {
                 <TextField
                   required
                   fullWidth
-                  label="Enter city/ Mandal"
-                  name="schoolCityOrMandal"
-                  value={formData.schoolCityOrMandal}
+                  label="School Address"
+                  name="schoolAddress"
+                  value={formData.schoolAddress}
                   onChange={handleChange}
-                  error={!!formErrors.schoolCityOrMandal}
-                  helperText={formErrors.schoolCityOrMandal}
-                />
-                <TextField
-                  required
-                  fullWidth
-                  label="Registration Number"
-                  name="schoolRegNumber"
-                  value={formData.schoolRegNumber}
-                  onChange={handleChange}
-                  error={!!formErrors.schoolRegNumber}
-                  helperText={formErrors.schoolRegNumber}
-                />
-              </Stack>
-              <Stack direction="row" spacing={3}>
-                <TextField
-                  required
-                  fullWidth
-                  label="School Passcode"
-                  name="schoolPasscode"
-                  type="password"
-                  value={formData.schoolPasscode}
-                  onChange={handleChange}
-                  error={!!formErrors.schoolPasscode}
-                  helperText={formErrors.schoolPasscode}
-                />
-                <TextField
-                  required
-                  fullWidth
-                  label="School Type"
-                  name="schoolType"
-                  value={formData.schoolType}
-                  onChange={handleChange}
-                  error={!!formErrors.schoolType}
-                  helperText={formErrors.schoolType}
-                />
-              </Stack>
-              <Stack direction="row" spacing={3}>
-                <TextField
-                  fullWidth
-                  label="School Landline"
-                  name="schoolLandline"
-                  value={formData.schoolLandline}
-                  onChange={handleChange}
-                  error={!!formErrors.schoolLandline}
-                  helperText={formErrors.schoolLandline}
-                />
-                <TextField
-                  required
-                  fullWidth
-                  label="Contact Number"
-                  name="schoolContactNumber"
-                  value={formData.schoolContactNumber}
-                  onChange={handleChange}
-                  error={!!formErrors.schoolContactNumber}
-                  helperText={formErrors.schoolContactNumber}
-                />
-              </Stack>
-              <Stack direction="row" spacing={3}>
-                <TextField
-                  required
-                  fullWidth
-                  label="Pin Code"
-                  name="schoolPinCode"
-                  value={formData.schoolPinCode}
-                  onChange={handleChange}
-                  error={!!formErrors.schoolPinCode}
-                  helperText={formErrors.schoolPinCode}
-                />
-                <TextField
-                  fullWidth
-                  label="School Logo (URL)"
-                  name="schoolLogo"
-                  value={formData.schoolLogo}
-                  onChange={handleChange}
-                  error={!!formErrors.schoolLogo}
-                  helperText={formErrors.schoolLogo}
-                />
-              </Stack>
-              <Stack direction="row" spacing={3}>
-                <TextField
-                  required
-                  fullWidth
-                  label="Street"
-                  name="schoolStreet"
-                  value={formData.schoolStreet}
-                  onChange={handleChange}
-                  error={!!formErrors.schoolStreet}
-                  helperText={formErrors.schoolStreet}
-                />
-                <TextField
-                  required
-                  fullWidth
-                  label="Building Number"
-                  name="schoolBuildingNumber"
-                  value={formData.schoolBuildingNumber}
-                  onChange={handleChange}
-                  error={!!formErrors.schoolBuildingNumber}
-                  helperText={formErrors.schoolBuildingNumber}
+                  error={!!formErrors.schoolAddress}
+                  helperText={formErrors.schoolAddress}
                 />
               </Stack>
             </Stack>

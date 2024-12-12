@@ -96,7 +96,7 @@ const LoginDetails = () => {
           margin="normal"
           required
           fullWidth
-          label="Email Address"
+          label="Username"
           name="email"
           autoComplete="email"
           autoFocus

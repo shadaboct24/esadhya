@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import {
@@ -31,6 +31,56 @@ import LoadingButton from "@mui/lab/LoadingButton";
 import { API_URL } from "../../Constants/api_url";
 
 const ResponsiveForm = () => {
+  const [locations, setLocations] = useState([]);
+  const [selectedCountry, setSelectedCountry] = useState("");
+  const [selectedState, setSelectedState] = useState("");
+  const [selectedDistrict, setSelectedDistrict] = useState("");
+  const [states, setStates] = useState([]);
+  const [districts, setDistricts] = useState([]);
+
+  useEffect(() => {
+    axios
+      .get(`${API_URL}/countries`)
+      .then((response) => {
+        setLocations(response.data);
+      })
+      .catch((error) => console.error("error fetching data:", error));
+  }, []);
+
+  const handleCountryChange = (event) => {
+    const country = event.target.value;
+    setSelectedCountry(country);
+
+    setFormData((prevData) => ({
+      ...prevData,
+      country: country,
+    }));
+    formerrors.country = "";
+
+    const countrydata = locations.find((loc) => loc.country === country);
+    setStates(countrydata?.states || []);
+    setSelectedState("");
+    setDistricts([]);
+    setSelectedDistrict("");
+  };
+
+  const handleStateChange = (event) => {
+    const state = event.target.value;
+    setSelectedState(state);
+    formData.state = state;
+    formerrors.state = "";
+
+    const statedata = states.find((st) => st.state === state);
+    setDistricts(statedata?.districts || []);
+    setSelectedDistrict("");
+  };
+
+  const handleDistrictChange = (event) => {
+    setSelectedDistrict(event.target.value);
+    formData.district = event.target.value;
+    formerrors.district = "";
+  };
+
   // State management
 
   const [formData, setFormData] = useState({
@@ -173,6 +223,7 @@ const ResponsiveForm = () => {
   const [loadingSMS, setLoadingSMS] = React.useState(false);
   const [smsotp, setSmsOtp] = useState("");
 
+  // this function is for sending otp to mail
   const handleSendOtp = () => {
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Basic email validation regex
 
@@ -240,6 +291,7 @@ const ResponsiveForm = () => {
     }
   };
 
+  //for verifying email otp
   const verifyEmail = () => {
     let data = {
       email: formData.email,
@@ -288,6 +340,7 @@ const ResponsiveForm = () => {
       });
   };
 
+  // sending mobile sms otp
   const handleSmsOtp = () => {
     const phoneregx = /^[0-9]{10}$/;
 
@@ -353,6 +406,7 @@ const ResponsiveForm = () => {
     }
   };
 
+  // verifying sms otp
   const verifySmsOtp = () => {
     let data = {
       phoneNumber: formData.contactNumber,
@@ -432,6 +486,10 @@ const ResponsiveForm = () => {
 
     if (!verified) {
       alert("email is not verfied");
+      return;
+    }
+    if (!verifiedSMS) {
+      alert("Phone Number is not verified");
       return;
     }
     setOpenDialog(true); // Show the dialog
@@ -833,40 +891,60 @@ const ResponsiveForm = () => {
             Address Details
           </Typography>
           <Stack spacing={2}>
-            <Stack direction="row" spacing={2}>
-              <TextField
-                label="Country"
-                name="country"
-                variant="outlined"
+            <Stack direction="row" spacing={3}>
+              <FormControl fullWidth error={!!formerrors.country}>
+                <InputLabel>Country</InputLabel>
+                <Select
+                  label="country"
+                  value={selectedCountry}
+                  onChange={handleCountryChange}
+                >
+                  {locations.map((loc) => (
+                    <MenuItem key={loc.country} value={loc.country}>
+                      {loc.country}
+                    </MenuItem>
+                  ))}
+                </Select>
+                <FormHelperText>{formerrors.country}</FormHelperText>
+              </FormControl>
+              <FormControl
                 fullWidth
-                required
-                value={formData.country}
-                onChange={handleInputChange}
-                helperText={formerrors.country}
-                error={!!formerrors.country}
-              />
-              <TextField
-                label="State"
-                name="state"
-                variant="outlined"
-                fullWidth
-                required
-                value={formData.state}
-                onChange={handleInputChange}
-                helperText={formerrors.state}
+                disabled={!states.length}
                 error={!!formerrors.state}
-              />
-              <TextField
-                label="District"
-                name="district"
-                variant="outlined"
+              >
+                <InputLabel>State</InputLabel>
+                <Select
+                  label="country"
+                  value={selectedState}
+                  onChange={handleStateChange}
+                >
+                  {states.map((st) => (
+                    <MenuItem key={st.state} value={st.state}>
+                      {st.state}
+                    </MenuItem>
+                  ))}
+                </Select>
+                <FormHelperText>{formerrors.state}</FormHelperText>
+              </FormControl>
+              <FormControl
                 fullWidth
-                required
-                value={formData.district}
-                onChange={handleInputChange}
-                helperText={formerrors.district}
-                error={!!formerrors.district}
-              />
+                disabled={!districts.length}
+                error={formerrors.district}
+              >
+                <InputLabel>District</InputLabel>
+                <Select
+                  label="district"
+                  value={selectedDistrict}
+                  onChange={handleDistrictChange}
+                >
+                  {districts.map((dt) => (
+                    <MenuItem key={dt} value={dt}>
+                      {dt}
+                    </MenuItem>
+                  ))}
+                </Select>
+                <FormHelperText>{formerrors.district}</FormHelperText>
+              </FormControl>
             </Stack>
             <FormControl required error={formerrors.belonging}>
               <FormLabel>You Are Belonging To</FormLabel>
