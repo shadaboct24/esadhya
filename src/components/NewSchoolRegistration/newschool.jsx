@@ -21,6 +21,7 @@ import {
 import axios from "axios";
 import { API_URL } from "../../Constants/api_url";
 import { toast } from "react-toastify";
+import { LoadingButton } from "@mui/lab";
 
 const NewAdmissionForm = () => {
   const [locations, setLocations] = useState([]);
@@ -83,7 +84,7 @@ const NewAdmissionForm = () => {
     adminContactNumber: "",
     schoolId: "",
     schoolName: "",
-    schoolAdminId: "",
+    //schoolAdminId: "",
     schoolAddress: "",
     schooldistrict: "",
     schoolState: "",
@@ -150,9 +151,9 @@ const NewAdmissionForm = () => {
       errors.schoolName = "School name is required";
     }
 
-    if (!formData.schoolAdminId.trim()) {
-      errors.schoolAdminId = "School admin ID is required";
-    }
+    // if (!formData.schoolAdminId.trim()) {
+    //   errors.schoolAdminId = "School admin ID is required";
+    // }
 
     if (!formData.schoolAddress.trim()) {
       errors.schoolAddress = "School address is required";
@@ -224,8 +225,8 @@ const NewAdmissionForm = () => {
 
   // State for the dialog visibility
   const [openDialog, setOpenDialog] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [formErrors, setFormErrors] = useState({});
-  const [emailError, setEmailError] = useState(false);
 
   // Handle input change
   const handleChange = (e) => {
@@ -235,6 +236,7 @@ const NewAdmissionForm = () => {
     const nameRegex = /^[a-zA-Z\s]*$/; // Only letters and spaces
     const numberRegex = /^\d*$/; // Only digits
     const phoneRegex = /^\d{0,10}$/; // Up to 10 digits
+    const emailregx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (
       ["adminName", "schoolName", "schoolType", "schoolCityOrMandal"].includes(
@@ -244,7 +246,11 @@ const NewAdmissionForm = () => {
       // Validate names: allow only letters and spaces
       if (nameRegex.test(value)) {
         setFormData((prevdata) => ({ ...prevdata, [name]: value }));
-        setFormErrors((preverrors) => ({ ...preverrors, [name]: "" }));
+        setFormErrors((preverrors) => {
+          const newerrors = { ...preverrors };
+          delete newerrors[name];
+          return newerrors;
+        });
       }
     } else if (
       ["adminContactNumber", "schoolContactNumber", "schoolLandline"].includes(
@@ -254,18 +260,45 @@ const NewAdmissionForm = () => {
       // Validate phone numbers: allow only up to 10 digits
       if (phoneRegex.test(value)) {
         setFormData((prevdata) => ({ ...prevdata, [name]: value }));
-        setFormErrors((preverrors) => ({ ...preverrors, [name]: "" }));
+        setFormErrors((preverrors) => {
+          const newerrors = { ...preverrors };
+          delete newerrors[name];
+          return newerrors;
+        });
+      }
+      if (value.length < 10) {
+        setFormErrors((preverrors) => ({
+          ...preverrors,
+          [name]: " Number must be 10 digit",
+        }));
       }
     } else if (["schoolPinCode"].includes(name)) {
       // Validate pin codes: allow only digits
       if (numberRegex.test(value)) {
         setFormData((prevdata) => ({ ...prevdata, [name]: value }));
-        setFormErrors((preverrors) => ({ ...preverrors, [name]: "" }));
+        setFormErrors((preverrors) => {
+          const newerrors = { ...preverrors };
+          delete newerrors[name];
+          return newerrors;
+        });
       }
+    } else if (["adminEmail"].includes(name)) {
+      setFormData((prevdata) => ({ ...prevdata, [name]: value }));
+      if (!emailregx.test(value)) {
+        setFormErrors((preverrors) => ({ ...preverrors, [name]: "err" }));
+      } else {
+        setFormErrors((preverrors) => {
+          const newerrors = { ...preverrors };
+          delete newerrors[name];
+          return newerrors;
+        });
+      }
+    } else if (name === "confirmPassword") {
+      setConfirmPassword(value);
     } else {
       // Default case: directly update other fields
       setFormData((prevdata) => ({ ...prevdata, [name]: value }));
-      setFormErrors((preverrors) => ({ ...preverrors, [name]: "" }));
+      setFormErrors((prevErrors) => ({ ...prevErrors, [name]: "" }));
     }
   };
 
@@ -277,6 +310,18 @@ const NewAdmissionForm = () => {
 
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
+      alert("Complete required feilds");
+      return;
+    }
+    if (formData.password !== confirmPassword) {
+      return;
+    }
+    if (!emailverified) {
+      alert("Email is not verified");
+      return;
+    }
+    if (!verifiedSMS) {
+      alert("Phone Number is not verified");
       return;
     }
 
@@ -317,7 +362,7 @@ const NewAdmissionForm = () => {
       adminContactNumber: "",
       schoolId: "",
       schoolName: "",
-      schoolAdminId: "",
+      // schoolAdminId: "",
       schoolAddress: "",
       schooldistrict: "",
       schoolState: "",
@@ -338,6 +383,245 @@ const NewAdmissionForm = () => {
     setSelectedDistrict("");
     setFormErrors({});
   };
+
+  //email otp states
+  const [sentemailotp, setSentEmailOtp] = useState(false);
+  const [emailverified, setEmailVerified] = useState(false);
+  const [emailloading, setEmailLoading] = useState(false);
+  const [emailotp, setEmailOtp] = useState("");
+
+  const handleSentEmailOtp = () => {
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Basic email validation regex
+
+    if (!formData.adminEmail) {
+      alert("Please enter Email");
+      return;
+    }
+    if (!emailPattern.test(formData.adminEmail)) {
+      alert("Please enter valid email");
+      return;
+    }
+    setEmailLoading(true);
+
+    let data = {
+      email: formData.adminEmail,
+    };
+
+    let config = {
+      method: "post",
+      maxBodyLength: Infinity,
+      url: `${API_URL}/api/otp/generate`,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: JSON.stringify(data),
+    };
+
+    if (!emailloading) {
+      axios
+        .request(config)
+        .then((response) => {
+          //console.log("Response received:", response);
+          if (response.data === true) {
+            toast.success("Success! Verification Code is sent .", {
+              position: "top-right",
+              autoClose: 5000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+              theme: "colored",
+            });
+            setSentEmailOtp(true);
+            setEmailLoading(false);
+          }
+        })
+        .catch((error) => {
+          const errormessage = error?.response?.data || "An Error";
+          toast.error("Error! " + errormessage, {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored",
+          });
+          setEmailLoading(false);
+        });
+    }
+  };
+
+  const handleEmailVerify = () => {
+    let data = {
+      email: formData.adminEmail,
+      otp: emailotp,
+    };
+
+    let config = {
+      method: "post",
+      maxBodyLength: Infinity,
+      url: `${API_URL}/api/otp/validate`,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: JSON.stringify(data),
+    };
+    // console.log("otp is", emailotp);
+    axios
+      .request(config)
+      .then((response) => {
+        if (response.data === true) {
+          toast.success("Success! Your Email Verified ", {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored",
+          });
+          setEmailVerified(true);
+        }
+      })
+      .catch((error) => {
+        const errormessage = error?.response?.data || "An Error";
+        toast.error("Error! " + errormessage, {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        });
+      });
+  };
+
+  //states for mobile otp
+  const [sentOtpSMS, setSentOtpSMS] = useState(false);
+  const [verifiedSMS, setVerifiedSMS] = useState(false);
+  const [loadingSMS, setLoadingSMS] = React.useState(false);
+  const [smsotp, setSmsOtp] = useState("");
+
+  const handleSentSmsOtp = () => {
+    const phoneregx = /^[0-9]{10}$/;
+
+    if (!formData.adminContactNumber) {
+      alert("Please enter mobile number first");
+      return;
+    }
+
+    if (!phoneregx.test(formData.adminContactNumber)) {
+      alert("Enter a valid phone number");
+      return;
+    }
+
+    setLoadingSMS(true);
+
+    let data = {
+      phoneNumber: formData.adminContactNumber,
+    };
+
+    let config = {
+      method: "post",
+      maxBodyLength: Infinity,
+      url: `${API_URL}/sendmobileotp`,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: JSON.stringify(data),
+    };
+
+    if (!loadingSMS) {
+      axios
+        .request(config)
+        .then((response) => {
+          if (response.data === true) {
+            toast.success("Success! Verification Code is sent .", {
+              position: "top-right",
+              autoClose: 5000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+              theme: "colored",
+            });
+            setSentOtpSMS(true);
+            setLoadingSMS(false);
+          }
+        })
+        .catch((error) => {
+          const errormessage = error?.response?.data || "An Error";
+          toast.error("Error! " + errormessage, {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored",
+          });
+          setLoadingSMS(false);
+        });
+    }
+  };
+
+  // verifying sms otp
+  const handleVerifySmsOtp = () => {
+    let data = {
+      phoneNumber: formData.adminContactNumber,
+      otp: smsotp,
+    };
+
+    let config = {
+      method: "post",
+      maxBodyLength: Infinity,
+      url: `${API_URL}/mobileotpvalidate`,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: JSON.stringify(data),
+    };
+
+    axios
+      .request(config)
+      .then((response) => {
+        if (response.data === true) {
+          toast.success("Success! Your Number Verified ", {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored",
+          });
+          setVerifiedSMS(true);
+        }
+      })
+      .catch((error) => {
+        const errormessage = error?.response?.data || "An Error";
+        toast.error("Error! " + errormessage, {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        });
+      });
+  };
+
   return (
     <>
       <Typography
@@ -374,7 +658,7 @@ const NewAdmissionForm = () => {
               Admin Details
             </Typography>
             <Stack spacing={2} required>
-              <Stack direction="row" spacing={3}>
+              <Stack direction={{ sm: "row", xs: "column" }} spacing={3}>
                 <TextField
                   required
                   fullWidth
@@ -388,19 +672,6 @@ const NewAdmissionForm = () => {
                 <TextField
                   required
                   fullWidth
-                  label="Admin Email"
-                  name="adminEmail"
-                  type="email"
-                  value={formData.adminEmail}
-                  onChange={handleChange}
-                  error={!!formErrors.adminEmail}
-                  helperText={formErrors.adminEmail}
-                />
-              </Stack>
-              <Stack direction="row" spacing={3}>
-                <TextField
-                  required
-                  fullWidth
                   label="Username"
                   name="username"
                   value={formData.username}
@@ -408,6 +679,8 @@ const NewAdmissionForm = () => {
                   error={!!formErrors.username}
                   helperText={formErrors.username}
                 />
+              </Stack>
+              <Stack spacing={3} direction={{ sm: "row", xs: "column" }}>
                 <TextField
                   required
                   fullWidth
@@ -419,8 +692,27 @@ const NewAdmissionForm = () => {
                   error={!!formErrors.password}
                   helperText={formErrors.password}
                 />
+                <TextField
+                  required
+                  fullWidth
+                  label="Confirm Password"
+                  name="confirmPassword"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={handleChange}
+                  error={formData.password !== confirmPassword}
+                  helperText={
+                    formData.password !== confirmPassword
+                      ? "Password do not match"
+                      : ""
+                  }
+                />
               </Stack>
-              <Stack direction="row" spacing={3}>
+              <Stack
+                direction="column"
+                spacing={3}
+                sx={{ width: { sm: "48.5%" } }}
+              >
                 <TextField
                   required
                   fullWidth
@@ -432,16 +724,101 @@ const NewAdmissionForm = () => {
                   error={!!formErrors.adminPasscode}
                   helperText={formErrors.adminPasscode}
                 />
-                <TextField
-                  required
-                  fullWidth
-                  label="Contact Number"
-                  name="adminContactNumber"
-                  value={formData.adminContactNumber}
-                  onChange={handleChange}
-                  error={!!formErrors.adminContactNumber}
-                  helperText={formErrors.adminContactNumber}
-                />
+              </Stack>
+              <Stack direction="column" spacing={3}>
+                <Stack direction="row" spacing={2}>
+                  <TextField
+                    required
+                    fullWidth
+                    sx={{ maxWidth: 400 }}
+                    label="Admin Email"
+                    name="adminEmail"
+                    type="email"
+                    disabled={emailverified}
+                    value={formData.adminEmail}
+                    onChange={handleChange}
+                    error={!!formErrors.adminEmail}
+                    helperText={formErrors.adminEmail}
+                  />
+                  <LoadingButton
+                    onClick={handleSentEmailOtp}
+                    loading={emailloading}
+                    variant="contained"
+                    disabled={emailverified || sentemailotp}
+                  >
+                    Send OTP
+                  </LoadingButton>
+                </Stack>
+                {sentemailotp && !emailverified && (
+                  <Stack direction="row" spacing={2}>
+                    <TextField
+                      label="Enter OTP"
+                      name="otpnumber"
+                      variant="outlined"
+                      fullWidth
+                      required
+                      onChange={(e) => {
+                        const input = e.target.value.replace(/\D/g, "");
+                        setEmailOtp(input);
+                      }}
+                      value={emailotp}
+                      sx={{ maxWidth: 400 }}
+                    />
+                    <Button
+                      variant="contained"
+                      disabled={emailverified}
+                      onClick={handleEmailVerify}
+                    >
+                      Verify OTP
+                    </Button>
+                  </Stack>
+                )}
+                <Stack direction="row" spacing={2}>
+                  <TextField
+                    required
+                    fullWidth
+                    sx={{ maxWidth: 400 }}
+                    label="Contact Number"
+                    name="adminContactNumber"
+                    value={formData.adminContactNumber}
+                    onChange={handleChange}
+                    disabled={verifiedSMS}
+                    error={!!formErrors.adminContactNumber}
+                    helperText={formErrors.adminContactNumber}
+                  />
+                  <LoadingButton
+                    onClick={handleSentSmsOtp}
+                    loading={loadingSMS}
+                    variant="contained"
+                    disabled={verifiedSMS || sentOtpSMS}
+                  >
+                    send OTP
+                  </LoadingButton>
+                </Stack>
+                {sentOtpSMS && !verifiedSMS && (
+                  <Stack direction="row" spacing={2}>
+                    <TextField
+                      label="Enter OTP"
+                      name="otpnumber"
+                      variant="outlined"
+                      fullWidth
+                      required
+                      onChange={(e) => {
+                        const input = e.target.value.replace(/\D/g, "");
+                        setSmsOtp(input);
+                      }}
+                      value={smsotp}
+                      sx={{ maxWidth: 400 }}
+                    />
+                    <Button
+                      variant="contained"
+                      disabled={verifiedSMS}
+                      onClick={handleVerifySmsOtp}
+                    >
+                      Verify OTP
+                    </Button>
+                  </Stack>
+                )}
               </Stack>
             </Stack>
 
@@ -450,7 +827,7 @@ const NewAdmissionForm = () => {
               School Details
             </Typography>
             <Stack spacing={2}>
-              <Stack direction="row" spacing={3}>
+              <Stack direction={{ sm: "row", xs: "column" }} spacing={3}>
                 <TextField
                   required
                   fullWidth
@@ -472,7 +849,7 @@ const NewAdmissionForm = () => {
                   helperText={formErrors.schoolName}
                 />
               </Stack>
-              <Stack direction="row" spacing={3}>
+              <Stack direction={{ sm: "row", xs: "column" }} spacing={3}>
                 <TextField
                   required
                   fullWidth
@@ -495,7 +872,7 @@ const NewAdmissionForm = () => {
                   helperText={formErrors.schoolPasscode}
                 />
               </Stack>
-              <Stack direction="row" spacing={3}>
+              <Stack direction={{ sm: "row", xs: "column" }} spacing={3}>
                 <TextField
                   required
                   fullWidth
@@ -516,7 +893,7 @@ const NewAdmissionForm = () => {
                   helperText={formErrors.schoolLogo}
                 />
               </Stack>
-              <Stack direction="row" spacing={3}>
+              <Stack direction={{ sm: "row", xs: "column" }} spacing={3}>
                 <TextField
                   fullWidth
                   label="School Landline"
@@ -537,7 +914,7 @@ const NewAdmissionForm = () => {
                   helperText={formErrors.schoolContactNumber}
                 />
               </Stack>
-              <Stack direction="row" spacing={3}>
+              <Stack direction={{ sm: "row", xs: "column" }} spacing={3}>
                 <TextField
                   required
                   fullWidth
@@ -559,7 +936,7 @@ const NewAdmissionForm = () => {
                   helperText={formErrors.schoolStreet}
                 />
               </Stack>
-              <Stack direction="row" spacing={3}>
+              <Stack direction={{ sm: "row", xs: "column" }} spacing={3}>
                 <TextField
                   required
                   fullWidth
@@ -581,7 +958,7 @@ const NewAdmissionForm = () => {
                   helperText={formErrors.schoolPinCode}
                 />
               </Stack>
-              <Stack direction="row" spacing={3}>
+              <Stack direction={{ sm: "row", xs: "column" }} spacing={3}>
                 <FormControl fullWidth error={!!formErrors.schoolCountry}>
                   <InputLabel>Country</InputLabel>
                   <Select
@@ -636,7 +1013,7 @@ const NewAdmissionForm = () => {
                   <FormHelperText>{formErrors.schooldistrict}</FormHelperText>
                 </FormControl>
               </Stack>
-              <Stack direction="row" spacing={3}>
+              <Stack direction={{ sm: "row", xs: "column" }} spacing={3}>
                 <TextField
                   required
                   fullWidth

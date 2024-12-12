@@ -789,6 +789,7 @@ const ResponsiveForm = () => {
                 label="Contact Number"
                 name="contactNumber"
                 variant="outlined"
+                disabled={verifiedSMS}
                 fullWidth
                 required
                 value={formData.contactNumber}
