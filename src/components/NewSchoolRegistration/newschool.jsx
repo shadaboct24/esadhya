@@ -387,10 +387,21 @@ const NewAdmissionForm = () => {
       schoolStreet: "",
       schoolBuildingNumber: "",
     });
+    setConfirmPassword("");
     setSelectedCountry("");
     setSelectedState("");
     setSelectedDistrict("");
     setFormErrors({});
+
+    setSentEmailOtp(false);
+    setEmailVerified(false);
+    setEmailLoading(false);
+    setEmailOtp("");
+
+    setSentOtpSMS(false);
+    setVerifiedSMS(false);
+    setLoadingSMS(false);
+    setSmsOtp("");
   };
 
   //email otp states

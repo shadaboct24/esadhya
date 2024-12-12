@@ -552,11 +552,19 @@ const ResponsiveForm = () => {
       address: "",
     });
     setConfirmPassword("");
+    setSelectedCountry("");
+    setSelectedState("");
+    setSelectedDistrict("");
     setSentOtp(false);
     setEmailOtp("");
     setLoading(false);
     setVerified(false);
     setFormerrors({});
+
+    setSentOtpSMS(false);
+    setVerifiedSMS(false);
+    setLoadingSMS(false);
+    setSmsOtp("");
   };
 
   return (
