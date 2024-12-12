@@ -282,10 +282,19 @@ const NewAdmissionForm = () => {
           return newerrors;
         });
       }
+      if (value.length < 6) {
+        setFormErrors((preverrors) => ({
+          ...preverrors,
+          [name]: "PinCode must be 6 digit",
+        }));
+      }
     } else if (["adminEmail"].includes(name)) {
       setFormData((prevdata) => ({ ...prevdata, [name]: value }));
       if (!emailregx.test(value)) {
-        setFormErrors((preverrors) => ({ ...preverrors, [name]: "err" }));
+        setFormErrors((preverrors) => ({
+          ...preverrors,
+          [name]: "Enter a valid Email",
+        }));
       } else {
         setFormErrors((preverrors) => {
           const newerrors = { ...preverrors };
