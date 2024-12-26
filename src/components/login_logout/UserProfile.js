@@ -42,7 +42,7 @@ const UserProfile = () => {
             variant="h5"
             sx={{ fontWeight: "bold", marginBottom: "15px" }}
           >
-            {user.fullName}
+            {user.username}
           </Typography>
           <Typography
             variant="body1"
