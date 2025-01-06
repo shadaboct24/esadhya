@@ -19,7 +19,7 @@ import {
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { API_URL } from "../../Constants/api_url";
 
-const ChildDropdown = () => {
+const ISAA = () => {
   const children = [
     { id: 1, name: "Abhishek", age: 7, grade: "2nd Grade" },
     { id: 2, name: "Babita", age: 9, grade: "4th Grade" },
@@ -40,7 +40,7 @@ const ChildDropdown = () => {
     const fetchQuestions = async () => {
       try {
         const response = await axios.get(
-          `${API_URL}/api/assessments/type/ASSESSTYPE_9`
+          `${API_URL}/api/assessments/type/ASSESSTYPE_1`
         );
         setQuestions(response.data);
         setLoading(false);
@@ -57,7 +57,7 @@ const ChildDropdown = () => {
   const checkExistingAssessment = async (childId) => {
     try {
       const response = await axios.get(
-        `${API_URL}/api/sensory-assessment/child/${childId}`
+        `${API_URL}/api/isaa-assessment/child/${childId}`
       );
       setHasExistingAssessment(response.data && response.data.length > 0);
     } catch (error) {
@@ -79,7 +79,7 @@ const ChildDropdown = () => {
     setLoading(true);
     try {
       const response = await axios.get(
-        `${API_URL}/api/assessments/existing-sensoryassessment/${selectedChildId}`
+        `${API_URL}/api/isaa-assessment/existing-isaaAssessment/${selectedChildId}`
       );
 
       if (response.data) {
@@ -121,7 +121,7 @@ const ChildDropdown = () => {
         (child) => child.id === selectedChildId
       );
       const response = await axios.get(
-        `${API_URL}/api/pdf/generate/${selectedChildId}?childName=${selectedChild.name}`,
+        `${API_URL}/api/isaa-assessment/generate/${selectedChildId}?childName=${selectedChild.name}`, //chnages it
         { responseType: "blob" }
       );
 
@@ -137,7 +137,6 @@ const ChildDropdown = () => {
 
   // Handle form submission
   const handleSubmit = async () => {
-    console.log("submitting sensory first time");
     const formattedResponses = Object.entries(responses).map(
       ([subsecid, option]) => ({
         subsecid,
@@ -153,14 +152,11 @@ const ChildDropdown = () => {
     try {
       if (isUpdating)
         await axios.post(
-          `${API_URL}/api/assessments/updatesensoryassessment/${selectedChildId}`,
+          `${API_URL}/api/isaa-assessment/updateIsaaAssessment/${selectedChildId}`,
           submitData
         );
       else
-        await axios.post(
-          `${API_URL}/api/sensory-assessment/submit`,
-          submitData
-        );
+        await axios.post(`${API_URL}/api/isaa-assessment/submit`, submitData);
       alert("Assessment updated successfully!");
       setResponses({});
       setHasExistingAssessment(true);
@@ -174,11 +170,11 @@ const ChildDropdown = () => {
   const selectedChild = children.find((child) => child.id === selectedChildId);
 
   const responseOptions = [
-    "Yes",
-    "No",
-    "Sometimes",
-    "No Exposure",
-    "Any Other",
+    "Rarely Upto 0-20%",
+    "Sometimes 21-40%",
+    "Frequently 41-60%",
+    "Mostly 61-80%",
+    "Always 81-100%",
   ];
 
   return (
@@ -371,4 +367,4 @@ const ChildDropdown = () => {
   );
 };
 
-export default ChildDropdown;
+export default ISAA;

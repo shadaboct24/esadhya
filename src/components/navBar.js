@@ -54,6 +54,7 @@ function Navbar() {
     { text: "New School Registration", icon: <SchoolIcon />, to: "/newreg" },
     { text: "Dashboard", icon: <DashboardIcon />, to: "/dashboard" },
     { text: "Sensory Scrr", icon: <DashboardIcon />, to: "/sensoryscreening" },
+    { text: "ISAA", icon: <DashboardIcon />, to: "/isaa" },
   ];
 
   const open = Boolean(anchorEl);

@@ -16,6 +16,7 @@ import UserProfile from "./components/login_logout/UserProfile";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import SensoryScreening from "./components/Assessments/Sensory_Screening_Checklist";
+import ISAA from "./components/Assessments/ISAA";
 
 function App() {
   return (
@@ -36,6 +37,7 @@ function App() {
         <Route path="/forgotpassword" element={<ForgotPassword />} />
         <Route path="/profile" element={<UserProfile />} />
         <Route path="/sensoryscreening" element={<SensoryScreening />} />
+        <Route path="/isaa" element={<ISAA />} />
       </Routes>
 
       <Footer />
