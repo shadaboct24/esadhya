@@ -19,6 +19,7 @@ function LogoHeader() {
           marginTop: "1vh",
           width: 100,
           height: 100,
+          alignItems: "center",
           backgroundImage: `url(${"https://eservices.uk.gov.in/indian-emblem.svg"})`,
           backgroundSize: "contain",
           backgroundRepeat: "no-repeat",
@@ -29,13 +30,18 @@ function LogoHeader() {
         sx={{
           flexGrow: 1,
           display: "flex",
-          alignItems: "flex-start",
+          alignItems: "center",
+          alignContent: "center",
           flexDirection: "column",
-          marginTop: "4vh",
+          marginTop: "2vh",
         }}
       >
-        <span style={{ color: "black", fontWeight: "bold" }}>E-Sadhya</span>
-        <span style={{ color: "black" }}>By CDAC</span>
+        <span style={{ color: "black", fontWeight: "bold", fontSize: "30px" }}>
+          e-Saadhya - An Adaptable & Accessible e-Learning Framework
+        </span>
+        <span style={{ fontSize: "20px" }}>
+          For the children with Mild Mental Retardation & Autism
+        </span>
       </Box>
       <Box
         sx={{
@@ -45,6 +51,7 @@ function LogoHeader() {
           backgroundImage: `url(${"Images/esadhya_logo.png"})`,
           backgroundSize: "contain",
           backgroundRepeat: "no-repeat",
+          marginLeft: "10px",
         }}
       />
     </Box>
