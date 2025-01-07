@@ -15,9 +15,11 @@ import {
   Dialog,
   DialogContent,
   CircularProgress,
+  TextField,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { API_URL } from "../../Constants/api_url";
+// import { TextField } from "@headlessui/react";
 
 const ISAA = () => {
   const children = [
@@ -34,6 +36,8 @@ const ISAA = () => {
   const [showPdfDialog, setShowPdfDialog] = useState(false);
   const [pdfUrl, setPdfUrl] = useState(null);
   const [isUpdating, setIsUpdating] = useState(false);
+
+  const [recommendation, setRecommendation] = useState("");
 
   // Fetch initial questions
   useEffect(() => {
@@ -97,6 +101,9 @@ const ISAA = () => {
           setResponses(responseObject);
         }
 
+        if (response.data.recommendation)
+          setRecommendation(response.data.recommendation);
+
         setIsUpdating(true);
       }
     } catch (error) {
@@ -147,6 +154,7 @@ const ISAA = () => {
     const submitData = {
       childId: selectedChildId,
       responses: formattedResponses,
+      recommendation: recommendation,
     };
 
     try {
@@ -309,7 +317,20 @@ const ISAA = () => {
                       </Accordion>
                     )
                   )}
-
+                  <Box>
+                    <Typography variant="h6" gutterBottom>
+                      Recommendation:
+                    </Typography>
+                    <TextField
+                      value={recommendation}
+                      onChange={(e) => setRecommendation(e.target.value)} // Directly setting value inside the onChange prop
+                      label="Type your sentence here"
+                      multiline
+                      rows={4}
+                      variant="outlined"
+                      fullWidth
+                    />
+                  </Box>
                   <Box
                     sx={{ mt: 3, display: "flex", justifyContent: "flex-end" }}
                   >
