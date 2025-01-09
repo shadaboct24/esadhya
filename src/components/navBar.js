@@ -55,6 +55,7 @@ function Navbar() {
     { text: "Dashboard", icon: <DashboardIcon />, to: "/dashboard" },
     { text: "Sensory Scrr", icon: <DashboardIcon />, to: "/sensoryscreening" },
     { text: "ISAA", icon: <DashboardIcon />, to: "/isaa" },
+    { text: "Reinforce", icon: <DashboardIcon />, to: "/reinforce" },
   ];
 
   const open = Boolean(anchorEl);
