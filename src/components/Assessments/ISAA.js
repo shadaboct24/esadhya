@@ -74,6 +74,7 @@ const ISAA = () => {
     const childId = event.target.value;
     setSelectedChildId(childId);
     setResponses({});
+    setRecommendation("");
     setIsUpdating(false);
     await checkExistingAssessment(childId);
   };

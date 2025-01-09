@@ -26,6 +26,7 @@ function App() {
       <LogoHeader />
       <Navbar />
 
+      {/* <div className="scrollable-container"> */}
       <Routes>
         <Route index element={<Home />} />
         <Route path="/signin" element={<LoginPage />} />
@@ -39,7 +40,7 @@ function App() {
         <Route path="/sensoryscreening" element={<SensoryScreening />} />
         <Route path="/isaa" element={<ISAA />} />
       </Routes>
-
+      {/* </div> */}
       <Footer />
     </BrowserRouter>
   );

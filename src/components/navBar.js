@@ -62,7 +62,7 @@ function Navbar() {
   return (
     <>
       <AppBar
-        position="sticky"
+        position="static"
         sx={{
           backgroundColor: "#AC8968",
           //top:120,zIndex:1000
