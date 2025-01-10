@@ -19,6 +19,14 @@ public class SensoryScreeningAssessment {
 	public class Subsection{
 		private String subsecid;
 		private String subsecname;
+		private String typeofsubsection;
+		
+		public String getTypeofsubsection() {
+			return typeofsubsection;
+		}
+		public void setTypeofsubsection(String typeofsubsection) {
+			this.typeofsubsection = typeofsubsection;
+		}
 		public String getSubsecid() {
 			return subsecid;
 		}

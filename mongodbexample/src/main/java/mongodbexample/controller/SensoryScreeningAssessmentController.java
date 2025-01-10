@@ -44,7 +44,7 @@ public class SensoryScreeningAssessmentController {
                 assessment.getSubsection_details()
             );
         }
-        
+//        System.out.println("hello");
         return ResponseEntity.ok(formattedData);
     }
     

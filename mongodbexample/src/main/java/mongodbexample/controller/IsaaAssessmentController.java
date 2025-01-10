@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import mongodbexample.dto.AssessmentRequestDTO;
 import mongodbexample.model.IsaaAssessment;
 import mongodbexample.model.SensoryScreeningAssessment;
 import mongodbexample.model.SensoryScreeningAssessment.Subsection;
