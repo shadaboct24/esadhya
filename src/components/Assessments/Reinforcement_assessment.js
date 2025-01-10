@@ -16,11 +16,14 @@ import {
   DialogContent,
   CircularProgress,
   TextField,
+  Checkbox,
+  FormGroup,
+  FormControlLabel,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { API_URL } from "../../Constants/api_url";
 
-const Reinforce_assessment = () => {
+const ReinforceAssessment = () => {
   const children = [
     { id: 1, name: "Abhishek", age: 7, grade: "2nd Grade" },
     { id: 2, name: "Babita", age: 9, grade: "4th Grade" },
@@ -36,7 +39,7 @@ const Reinforce_assessment = () => {
   const [pdfUrl, setPdfUrl] = useState(null);
   const [isUpdating, setIsUpdating] = useState(false);
 
-  // Fetch initial questions
+  // Fetch questions from backend
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
@@ -58,15 +61,26 @@ const Reinforce_assessment = () => {
   const checkExistingAssessment = async (childId) => {
     try {
       const response = await axios.get(
-        `${API_URL}/api/reinforce-assessment/child/${childId}`
+        `${API_URL}/api/reinforce-assessments/child/${childId}`
       );
-      setHasExistingAssessment(response.data && response.data.length > 0);
+      const hasExisting = response.data && response.data.length > 0;
+      setHasExistingAssessment(hasExisting);
+
+      if (hasExisting) {
+        // If there's existing data, enable the update/view options
+        const pdfResponse = await axios.get(
+          `${API_URL}/api/pdf/generatereinforce/${childId}?childName=${children.find((c) => c.id === childId)?.name}`,
+          { responseType: "blob" }
+        );
+        const pdfUrl = URL.createObjectURL(pdfResponse.data);
+        setPdfUrl(pdfUrl);
+      }
     } catch (error) {
       console.error("Error checking existing assessment:", error);
+      setHasExistingAssessment(false);
     }
   };
 
-  // Handle child selection change
   const handleChange = async (event) => {
     const childId = event.target.value;
     setSelectedChildId(childId);
@@ -75,70 +89,88 @@ const Reinforce_assessment = () => {
     await checkExistingAssessment(childId);
   };
 
-  // Handle update button click
-  const handleUpdate = async () => {
-    setLoading(true);
-    try {
-      const response = await axios.get(
-        `${API_URL}/api/assessments/existing-reinforceassessment/${selectedChildId}`
-      );
-
-      if (response.data) {
-        // Update questions if needed
-        if (response.data.questions) {
-          setQuestions(response.data.questions);
-        }
-
-        // Set existing responses
-        if (response.data.responses) {
-          const responseObject = {};
-          response.data.responses.responses.forEach((response) => {
-            responseObject[response.subsecid] = response.option;
-          });
-          setResponses(responseObject);
-        }
-
-        setIsUpdating(true);
-      }
-    } catch (error) {
-      console.error("Error fetching existing assessment:", error);
-      alert("Error loading existing assessment. Please try again.");
-    }
-    setLoading(false);
-  };
-
-  // Handle response selection
-  const handleResponseChange = (subsecId, value) => {
+  const handleResponseChange = (subsecId, value, type) => {
     setResponses((prev) => ({
       ...prev,
-      [subsecId]: value,
+      [subsecId]: type === "selective" ? (value ? "yes" : "no") : value,
     }));
   };
 
-  // Generate and show PDF report
-  const handleViewReport = async () => {
-    try {
-      const selectedChild = children.find(
-        (child) => child.id === selectedChildId
-      );
-      const response = await axios.get(
-        `${API_URL}/api/pdf/generatereinforce/${selectedChildId}?childName=${selectedChild.name}`,
-        { responseType: "blob" }
-      );
-
-      const pdfBlob = new Blob([response.data], { type: "application/pdf" });
-      const pdfUrl = URL.createObjectURL(pdfBlob);
-      setPdfUrl(pdfUrl);
+  const handleViewReport = () => {
+    if (pdfUrl) {
       setShowPdfDialog(true);
-    } catch (error) {
-      console.error("Error generating PDF:", error);
-      alert("Error generating report. Please try again.");
     }
   };
 
-  // Handle form submission
+  // Render descriptive question with text input
+  const renderDescriptiveQuestion = (question) => (
+    <Box key={question.subsecid} sx={{ mb: 3 }}>
+      <Typography variant="body1" sx={{ mb: 1 }}>
+        {question.subsecname}
+      </Typography>
+      <TextField
+        fullWidth
+        multiline
+        rows={1}
+        variant="outlined"
+        value={responses[question.subsecid] || ""}
+        onChange={(e) =>
+          handleResponseChange(question.subsecid, e.target.value, "descriptive")
+        }
+        placeholder="Enter your response here"
+      />
+    </Box>
+  );
+
+  // Render selective questions as checkboxes
+  const renderSelectiveQuestions = (questions) => (
+    <FormGroup>
+      <Typography variant="h6">
+        Info: Use a Check mark to indicate the items preferred
+      </Typography>
+      {questions.map((question) => (
+        <FormControlLabel
+          key={question.subsecid}
+          control={
+            <Checkbox
+              checked={responses[question.subsecid] === "yes"}
+              onChange={(e) =>
+                handleResponseChange(
+                  question.subsecid,
+                  e.target.checked,
+                  "selective"
+                )
+              }
+            />
+          }
+          label={question.subsecname}
+        />
+      ))}
+    </FormGroup>
+  );
+
+  // Group questions by type within each section
+  const renderSectionQuestions = (sectionQuestions) => {
+    const descriptiveQuestions = sectionQuestions.filter(
+      (q) => q.typeofsubsection === "descriptive"
+    );
+    const selectiveQuestions = sectionQuestions.filter(
+      (q) => q.typeofsubsection === "selective"
+    );
+
+    return (
+      <>
+        {descriptiveQuestions.map(renderDescriptiveQuestion)}
+        {selectiveQuestions.length > 0 && (
+          <Box sx={{ mt: 3 }}>
+            {renderSelectiveQuestions(selectiveQuestions)}
+          </Box>
+        )}
+      </>
+    );
+  };
+
   const handleSubmit = async () => {
-    console.log("submitting sensory first time");
     const formattedResponses = Object.entries(responses).map(
       ([subsecid, option]) => ({
         subsecid,
@@ -148,39 +180,33 @@ const Reinforce_assessment = () => {
 
     const submitData = {
       childId: selectedChildId,
-      responses: formattedResponses,
+      response: formattedResponses,
     };
 
     try {
-      if (isUpdating)
-        await axios.post(
-          `${API_URL}/api/assessments/updatereinforceassessment/${selectedChildId}`,
-          submitData
-        );
-      else
-        await axios.post(
-          `${API_URL}/api/sensory-assessment/submit`,
-          submitData
-        );
-      alert("Assessment updated successfully!");
+      console.log("data is :", submitData);
+      const endpoint = isUpdating
+        ? `${API_URL}/api/assessments/updatereinforceassessment/${selectedChildId}`
+        : `${API_URL}/api/reinforce-assessments/submit`;
+
+      await axios.post(endpoint, submitData);
+
+      alert(
+        isUpdating
+          ? "Assessment updated successfully!"
+          : "Assessment submitted successfully!"
+      );
       setResponses({});
       setHasExistingAssessment(true);
       setIsUpdating(false);
+      await checkExistingAssessment(selectedChildId); // Refresh PDF URL after submission
     } catch (error) {
-      console.error("Error updating assessment:", error);
-      alert("Error updating assessment. Please try again.");
+      console.error("Error submitting assessment:", error);
+      alert("Error submitting assessment. Please try again.");
     }
   };
 
   const selectedChild = children.find((child) => child.id === selectedChildId);
-
-  const responseOptions = [
-    "Yes",
-    "No",
-    "Sometimes",
-    "No Exposure",
-    "Any Other",
-  ];
 
   return (
     <Box
@@ -198,18 +224,14 @@ const Reinforce_assessment = () => {
         {isUpdating ? "Update Assessment" : "Select a Child"}
       </Typography>
 
-      <FormControl fullWidth>
-        <InputLabel id="child-select-label">Child</InputLabel>
+      <FormControl fullWidth sx={{ mb: 3 }}>
+        <InputLabel>Select Child</InputLabel>
         <Select
-          labelId="child-select-label"
-          label="Child"
+          label="child select"
           value={selectedChildId}
           onChange={handleChange}
           disabled={isUpdating}
         >
-          <MenuItem value="" disabled>
-            Choose a child
-          </MenuItem>
           {children.map((child) => (
             <MenuItem key={child.id} value={child.id}>
               {child.name}
@@ -222,7 +244,7 @@ const Reinforce_assessment = () => {
         <Grid container spacing={3} sx={{ mt: 3 }}>
           <Grid item xs={12} md={4}>
             <Box sx={{ p: 2, border: "1px solid #ddd", borderRadius: "8px" }}>
-              <Typography variant="h6">Details:</Typography>
+              <Typography variant="h6">Child Details</Typography>
               <Typography>Name: {selectedChild.name}</Typography>
               <Typography>Age: {selectedChild.age}</Typography>
               <Typography>Grade: {selectedChild.grade}</Typography>
@@ -233,25 +255,26 @@ const Reinforce_assessment = () => {
                     variant="contained"
                     color="primary"
                     fullWidth
-                    sx={{ mt: 2 }}
                     onClick={handleViewReport}
+                    sx={{ mb: 2 }}
                   >
                     View Report
                   </Button>
                   <Button
                     variant="contained"
-                    color="primary"
+                    color="secondary"
                     fullWidth
                     sx={{ mt: 2 }}
-                    onClick={handleUpdate}
+                    onClick={() => setIsUpdating(true)}
                   >
-                    Update
+                    Update Assessment
                   </Button>
                 </Box>
               )}
             </Box>
           </Grid>
 
+          {/* <Grid item xs={12} md={8}> */}
           {loading ? (
             <Grid
               item
@@ -265,74 +288,51 @@ const Reinforce_assessment = () => {
             >
               <CircularProgress />
             </Grid>
-          ) : (
-            (isUpdating || !hasExistingAssessment) && (
-              <Grid item xs={12} md={8}>
-                <Box
-                  sx={{
-                    p: 2,
-                    border: "1px solid #ddd",
-                    borderRadius: "8px",
-                  }}
-                >
-                  {Object.entries(questions).map(
-                    ([section, sectionQuestions]) => (
-                      <Accordion
-                        key={section}
-                        defaultExpanded={isUpdating}
-                        sx={{ mb: 2 }}
-                      >
-                        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                          <Typography variant="subtitle1">{section}</Typography>
-                        </AccordionSummary>
-                        <AccordionDetails>
-                          {sectionQuestions.map((question) => (
-                            <Box key={question.subsecid} sx={{ mb: 2 }}>
-                              <Typography variant="h6">
-                                {question.subsecname}
-                              </Typography>
-                              <TextField
-                                placeholder="write here"
-                                sx={{ flex: 1, display: "flex" }}
-                              />
-                            </Box>
-                          ))}
-                        </AccordionDetails>
-                      </Accordion>
-                    )
-                  )}
-
-                  <Box
-                    sx={{ mt: 3, display: "flex", justifyContent: "flex-end" }}
-                  >
-                    {isUpdating && (
-                      <Button
-                        variant="outlined"
-                        color="secondary"
-                        onClick={() => {
-                          setIsUpdating(false);
-                          setResponses({});
-                        }}
-                        sx={{ mr: 2 }}
-                      >
-                        Cancel Update
-                      </Button>
-                    )}
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={handleSubmit}
-                      disabled={
-                        !selectedChildId || Object.keys(responses).length === 0
-                      }
+          ) : !hasExistingAssessment || isUpdating ? (
+            <Grid item xs={12} md={8}>
+              <Box sx={{ p: 2, border: "1px solid #ddd", borderRadius: "8px" }}>
+                {Object.entries(questions).map(
+                  ([section, sectionQuestions]) => (
+                    <Accordion
+                      key={section}
+                      defaultExpanded={isUpdating}
+                      sx={{ mb: 2 }}
                     >
-                      {isUpdating ? "Save Updates" : "Submit Assessment"}
+                      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                        <Typography>{section}</Typography>
+                      </AccordionSummary>
+                      <AccordionDetails>
+                        {renderSectionQuestions(sectionQuestions)}
+                      </AccordionDetails>
+                    </Accordion>
+                  )
+                )}
+
+                <Box
+                  sx={{ mt: 3, display: "flex", justifyContent: "flex-end" }}
+                >
+                  {isUpdating && (
+                    <Button
+                      variant="outlined"
+                      onClick={() => setIsUpdating(false)}
+                      sx={{ mr: 2 }}
+                    >
+                      Cancel
                     </Button>
-                  </Box>
+                  )}
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleSubmit}
+                    disabled={Object.keys(responses).length === 0}
+                  >
+                    {isUpdating ? "Update Assessment" : "Submit Assessment"}
+                  </Button>
                 </Box>
-              </Grid>
-            )
-          )}
+              </Box>
+            </Grid>
+          ) : null}
+          {/* </Grid> */}
         </Grid>
       )}
 
@@ -359,4 +359,4 @@ const Reinforce_assessment = () => {
   );
 };
 
-export default Reinforce_assessment;
+export default ReinforceAssessment;
