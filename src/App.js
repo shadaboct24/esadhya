@@ -18,6 +18,7 @@ import "react-toastify/dist/ReactToastify.css";
 import SensoryScreening from "./components/Assessments/Sensory_Screening_Checklist";
 import ISAA from "./components/Assessments/ISAA";
 import Reinforce_assessment from "./components/Assessments/Reinforcement_assessment";
+import Assessment_child from "./components/Assessments/Assessment_child";
 
 function App() {
   return (
@@ -41,6 +42,7 @@ function App() {
         <Route path="/sensoryscreening" element={<SensoryScreening />} />
         <Route path="/isaa" element={<ISAA />} />
         <Route path="/reinforce" element={<Reinforce_assessment />} />
+        <Route path="/assessment_child" element={<Assessment_child />} />
       </Routes>
 
       <Footer />

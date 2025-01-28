@@ -47,6 +47,7 @@ const ReinforceAssessment = () => {
           `${API_URL}/api/assessments/type/ASSESSTYPE_6`
         );
         setQuestions(response.data);
+        console.log(response.data);
         setLoading(false);
       } catch (error) {
         console.error("Error fetching questions:", error);
@@ -57,24 +58,45 @@ const ReinforceAssessment = () => {
     fetchQuestions();
   }, []);
 
+  // Fetch existing assessment for a child
+  const fetchExistingAssessment = async (childId) => {
+    try {
+      const response = await axios.get(
+        `${API_URL}/api/reinforce-assessments/child/${childId}`
+      );
+
+      // if (response.data && response.data.responses) {
+      //   // Convert array of responses to object format for easier handling
+      //   const responseObject = response.data.responses.reduce((acc, item) => {
+      //     acc[item.subsecid] = item.option;
+      //     return acc;
+      //   }, {});
+      if (response.data.responses) {
+        const responseObject = {};
+        response.data.responses.response.forEach((response) => {
+          responseObject[response.subsecid] = response.option;
+        });
+        setResponses(responseObject);
+        setHasExistingAssessment(true);
+      } else {
+        setResponses({});
+        setHasExistingAssessment(false);
+      }
+    } catch (error) {
+      console.error("Error fetching existing assessment:", error);
+      setHasExistingAssessment(false);
+    }
+  };
+
   // Check if child has existing assessment
   const checkExistingAssessment = async (childId) => {
     try {
       const response = await axios.get(
         `${API_URL}/api/reinforce-assessments/child/${childId}`
       );
-      const hasExisting = response.data && response.data.length > 0;
+      const hasExisting = response.data.responses.response.length > 0;
       setHasExistingAssessment(hasExisting);
-
-      if (hasExisting) {
-        // If there's existing data, enable the update/view options
-        const pdfResponse = await axios.get(
-          `${API_URL}/api/pdf/generatereinforce/${childId}?childName=${children.find((c) => c.id === childId)?.name}`,
-          { responseType: "blob" }
-        );
-        const pdfUrl = URL.createObjectURL(pdfResponse.data);
-        setPdfUrl(pdfUrl);
-      }
+      console.log(hasExisting, response.data);
     } catch (error) {
       console.error("Error checking existing assessment:", error);
       setHasExistingAssessment(false);
@@ -86,7 +108,13 @@ const ReinforceAssessment = () => {
     setSelectedChildId(childId);
     setResponses({});
     setIsUpdating(false);
+    console.log("id is:", childId);
     await checkExistingAssessment(childId);
+  };
+
+  const handleStartUpdate = async () => {
+    setIsUpdating(true);
+    await fetchExistingAssessment(selectedChildId);
   };
 
   const handleResponseChange = (subsecId, value, type) => {
@@ -96,9 +124,62 @@ const ReinforceAssessment = () => {
     }));
   };
 
-  const handleViewReport = () => {
-    if (pdfUrl) {
+  const handleViewReport = async () => {
+    try {
+      const selectedChild = children.find(
+        (child) => child.id === selectedChildId
+      );
+      const response = await axios.get(
+        `${API_URL}/api/reinforce-assessments/generate/${selectedChildId}?childName=${selectedChild.name}`, //chnages it
+        { responseType: "blob" }
+      );
+
+      const pdfBlob = new Blob([response.data], { type: "application/pdf" });
+      const pdfUrl = URL.createObjectURL(pdfBlob);
+      setPdfUrl(pdfUrl);
       setShowPdfDialog(true);
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      alert("Error generating report. Please try again.");
+    }
+  };
+
+  const handleSubmit = async () => {
+    // Convert responses object back to array format
+    const formattedResponses = Object.entries(responses).map(
+      ([subsecid, option]) => ({
+        subsecid,
+        option,
+      })
+    );
+
+    const submitData = {
+      childId: selectedChildId,
+      response: formattedResponses,
+    };
+
+    try {
+      if (isUpdating) {
+        console.log("this is the data before submission", submitData);
+        await axios.post(
+          `${API_URL}/api/reinforce-assessments/update/${selectedChildId}`,
+          submitData
+        );
+        alert("Assessment updated successfully!");
+      } else {
+        await axios.post(
+          `${API_URL}/api/reinforce-assessments/submit`,
+          submitData
+        );
+        alert("Assessment submitted successfully!");
+      }
+      setResponses({});
+      setHasExistingAssessment(true);
+      setIsUpdating(false);
+      await checkExistingAssessment(selectedChildId);
+    } catch (error) {
+      console.error("Error submitting assessment:", error);
+      alert("Error submitting assessment. Please try again.");
     }
   };
 
@@ -170,42 +251,6 @@ const ReinforceAssessment = () => {
     );
   };
 
-  const handleSubmit = async () => {
-    const formattedResponses = Object.entries(responses).map(
-      ([subsecid, option]) => ({
-        subsecid,
-        option,
-      })
-    );
-
-    const submitData = {
-      childId: selectedChildId,
-      response: formattedResponses,
-    };
-
-    try {
-      console.log("data is :", submitData);
-      const endpoint = isUpdating
-        ? `${API_URL}/api/assessments/updatereinforceassessment/${selectedChildId}`
-        : `${API_URL}/api/reinforce-assessments/submit`;
-
-      await axios.post(endpoint, submitData);
-
-      alert(
-        isUpdating
-          ? "Assessment updated successfully!"
-          : "Assessment submitted successfully!"
-      );
-      setResponses({});
-      setHasExistingAssessment(true);
-      setIsUpdating(false);
-      await checkExistingAssessment(selectedChildId); // Refresh PDF URL after submission
-    } catch (error) {
-      console.error("Error submitting assessment:", error);
-      alert("Error submitting assessment. Please try again.");
-    }
-  };
-
   const selectedChild = children.find((child) => child.id === selectedChildId);
 
   return (
@@ -250,7 +295,7 @@ const ReinforceAssessment = () => {
               <Typography>Grade: {selectedChild.grade}</Typography>
 
               {hasExistingAssessment && !isUpdating && (
-                <Box>
+                <Box sx={{ mt: 2 }}>
                   <Button
                     variant="contained"
                     color="primary"
@@ -264,8 +309,7 @@ const ReinforceAssessment = () => {
                     variant="contained"
                     color="secondary"
                     fullWidth
-                    sx={{ mt: 2 }}
-                    onClick={() => setIsUpdating(true)}
+                    onClick={handleStartUpdate}
                   >
                     Update Assessment
                   </Button>
@@ -274,7 +318,6 @@ const ReinforceAssessment = () => {
             </Box>
           </Grid>
 
-          {/* <Grid item xs={12} md={8}> */}
           {loading ? (
             <Grid
               item
@@ -314,7 +357,10 @@ const ReinforceAssessment = () => {
                   {isUpdating && (
                     <Button
                       variant="outlined"
-                      onClick={() => setIsUpdating(false)}
+                      onClick={() => {
+                        setIsUpdating(false);
+                        setResponses({});
+                      }}
                       sx={{ mr: 2 }}
                     >
                       Cancel
@@ -332,7 +378,6 @@ const ReinforceAssessment = () => {
               </Box>
             </Grid>
           ) : null}
-          {/* </Grid> */}
         </Grid>
       )}
 
