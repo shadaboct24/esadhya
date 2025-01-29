@@ -135,8 +135,6 @@ export default function AssessmentChild() {
   };
 
   const confirmChild = (child) => {
-    // const childId = childid;
-    // const child = children.find((child) => child.id === childId);
     setSelectedChild(child);
     setIsChildConfirmed(true);
   };
@@ -272,86 +270,6 @@ export default function AssessmentChild() {
               onRowsPerPageChange={handleChangeRowsPerPage}
             />
           </TableContainer>
-
-          {/* Dropdown */}
-
-          {/* <Box sx={{ display: "flex", flexDirection: "column", width: "35%" }}>
-            <FormControl
-              fullWidth
-              sx={{
-                maxWidth: 400,
-              }}
-            >
-              <InputLabel>Select Child</InputLabel>
-              <Select
-                value={selectedChild ? selectedChild.id : ""}
-                onChange={handleChildChange}
-                label="Select Child"
-                sx={{
-                  "& .MuiSelect-select": {
-                    p: 2,
-                  },
-                }}
-              >
-                {children.map((child) => (
-                  <MenuItem key={child.id} value={child.id}>
-                    {child.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            {selectedChild && (
-              <>
-                <Card
-                  sx={{
-                    maxWidth: 400,
-                    mt: 2,
-                    mb: 2,
-                    textAlign: "center",
-                    borderRadius: 4,
-                    boxShadow: 5,
-                    bgcolor: "#e0f7fa",
-                  }}
-                >
-                  <CardContent>
-                    <Typography variant="h5" sx={{ color: "#006064", mb: 1 }}>
-                      {selectedChild.name}
-                    </Typography>
-                    <Typography
-                      variant="body1"
-                      sx={{ color: "#004d40", mb: 1 }}
-                    >
-                      Age: {selectedChild.age}
-                    </Typography>
-                    <Typography variant="body1" sx={{ color: "#004d40" }}>
-                      Grade: {selectedChild.grade}
-                    </Typography>
-                  </CardContent>
-                </Card>
-
-                <Box sx={{ display: "flex", justifyContent: "start", gap: 2 }}>
-                  <Button
-                    variant="contained"
-                    sx={{
-                      bgcolor: "#00695c",
-                      "&:hover": { bgcolor: "#004d40" },
-                    }}
-                    onClick={confirmChild}
-                  >
-                    Continue with {selectedChild.name}
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    sx={{ borderColor: "#00695c", color: "#00695c" }}
-                    onClick={() => setSelectedChild(null)}
-                  >
-                    Change Child
-                  </Button>
-                </Box>
-              </>
-            )}
-          </Box> */}
         </Box>
       ) : (
         // Child Details Card
