@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { styled } from "@mui/material/styles";
 import {
   MenuItem,
@@ -18,6 +18,7 @@ import {
   TableRow,
   Paper,
   TablePagination,
+  TextField,
 } from "@mui/material";
 import { tableCellClasses } from "@mui/material/TableCell";
 import {
@@ -27,6 +28,7 @@ import {
   ListItemIcon,
   ListItemText,
   Toolbar,
+  InputAdornment,
 } from "@mui/material";
 import {
   Home,
@@ -35,8 +37,9 @@ import {
   Description,
   Logout,
 } from "@mui/icons-material";
+import SearchIcon from "@mui/icons-material/Search";
 import { Link } from "react-router-dom";
-import ReinforceAssessment from "./Reinforcement_assessment";
+import ProgressStepper from "../ProgressBar";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -58,6 +61,32 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
     border: 0,
   },
 }));
+
+const SearchTextField = styled(TextField)({
+  "& .MuiInputBase-input": {
+    color: "white",
+  },
+  "& .MuiOutlinedInput-root": {
+    "& fieldset": {
+      borderColor: "rgba(255, 255, 255, 0.5)",
+    },
+    "&:hover fieldset": {
+      borderColor: "white",
+    },
+    "&.Mui-focused fieldset": {
+      borderColor: "white",
+    },
+  },
+  "& .MuiInputLabel-root": {
+    color: "rgba(255, 255, 255, 0.7)",
+  },
+  "& .MuiInputLabel-root.Mui-focused": {
+    color: "white",
+  },
+  "& .MuiSvgIcon-root": {
+    color: "white",
+  },
+});
 
 export default function AssessmentChild() {
   const navItems = [
@@ -84,6 +113,20 @@ export default function AssessmentChild() {
   const [isChildConfirmed, setIsChildConfirmed] = useState(false);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredChildren, setFilteredChildren] = useState(children);
+  const [hoveredRowId, setHoveredRowId] = useState(null);
+
+  useEffect(() => {
+    const filtered = children.filter((child) => {
+      const searchLower = searchTerm.toLowerCase();
+      const matchesId = child.id.toString().includes(searchTerm);
+      const matchesName = child.name.toLowerCase().includes(searchLower);
+      return matchesId || matchesName;
+    });
+    setFilteredChildren(filtered);
+    setPage(0); // Reset to first page when searching
+  }, [searchTerm]);
 
   const handleChildChange = (event) => {
     const childId = event.target.value;
@@ -91,7 +134,10 @@ export default function AssessmentChild() {
     setSelectedChild(child);
   };
 
-  const confirmChild = () => {
+  const confirmChild = (child) => {
+    // const childId = childid;
+    // const child = children.find((child) => child.id === childId);
+    setSelectedChild(child);
     setIsChildConfirmed(true);
   };
 
@@ -128,7 +174,14 @@ export default function AssessmentChild() {
       }}
     >
       {!isChildConfirmed ? (
-        <>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            width: "100%",
+            alignItems: "center",
+          }}
+        >
           {/* Table */}
           <TableContainer
             component={Paper}
@@ -136,22 +189,53 @@ export default function AssessmentChild() {
               boxShadow: 3,
               borderRadius: 2,
               width: "50%",
-              marginRight: 4,
             }}
           >
-            <Table sx={{ minWidth: 500 }} aria-label="customized table">
+            <Table sx={{ minWidth: 400 }} aria-label="customized table">
               <TableHead>
+                {/* Full-width search row */}
                 <TableRow>
+                  <StyledTableCell colSpan={4} sx={{ padding: 1 }}>
+                    <SearchTextField
+                      size="small"
+                      placeholder="Search by ID or Name"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <SearchIcon />
+                          </InputAdornment>
+                        ),
+                      }}
+                      sx={{
+                        width: "100%",
+                        "& .MuiOutlinedInput-root": {
+                          height: "35px",
+                        },
+                      }}
+                    />
+                  </StyledTableCell>
+                </TableRow>
+
+                {/* Column headers */}
+                <TableRow sx={{ bgcolor: "ButtonHighlight" }}>
                   <StyledTableCell>Child ID</StyledTableCell>
                   <StyledTableCell align="left">Name</StyledTableCell>
                   <StyledTableCell align="left">Grade</StyledTableCell>
+                  <StyledTableCell align="center">Actions</StyledTableCell>
                 </TableRow>
               </TableHead>
+
               <TableBody>
-                {children
+                {filteredChildren
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((child) => (
-                    <StyledTableRow key={child.id}>
+                    <StyledTableRow
+                      key={child.id}
+                      onMouseEnter={() => setHoveredRowId(child.id)}
+                      onMouseLeave={() => setHoveredRowId(null)}
+                    >
                       <StyledTableCell>{child.id}</StyledTableCell>
                       <StyledTableCell align="left">
                         {child.name}
@@ -159,14 +243,29 @@ export default function AssessmentChild() {
                       <StyledTableCell align="left">
                         {child.grade}
                       </StyledTableCell>
+                      <StyledTableCell align="center">
+                        {hoveredRowId === child.id && (
+                          <Button
+                            variant="contained"
+                            size="small"
+                            onClick={(e) => {
+                              e.stopPropagation(); // Prevents unintended row selection
+                              confirmChild(child);
+                            }}
+                          >
+                            Proceed
+                          </Button>
+                        )}
+                      </StyledTableCell>
                     </StyledTableRow>
                   ))}
               </TableBody>
             </Table>
+
             <TablePagination
               rowsPerPageOptions={[5, 10, 15]}
               component="div"
-              count={children.length}
+              count={filteredChildren.length}
               rowsPerPage={rowsPerPage}
               page={page}
               onPageChange={handleChangePage}
@@ -175,16 +274,12 @@ export default function AssessmentChild() {
           </TableContainer>
 
           {/* Dropdown */}
-          <Box sx={{ display: "flex", flexDirection: "column", width: "35%" }}>
+
+          {/* <Box sx={{ display: "flex", flexDirection: "column", width: "35%" }}>
             <FormControl
               fullWidth
               sx={{
                 maxWidth: 400,
-                // bgcolor: "white",
-                // p: 2,
-                // borderRadius: 2,
-                // boxShadow: 3,
-                // mb: 2,
               }}
             >
               <InputLabel>Select Child</InputLabel>
@@ -206,7 +301,6 @@ export default function AssessmentChild() {
               </Select>
             </FormControl>
 
-            {/* Child Details Below Dropdown */}
             {selectedChild && (
               <>
                 <Card
@@ -236,7 +330,6 @@ export default function AssessmentChild() {
                   </CardContent>
                 </Card>
 
-                {/* Action Buttons */}
                 <Box sx={{ display: "flex", justifyContent: "start", gap: 2 }}>
                   <Button
                     variant="contained"
@@ -258,8 +351,8 @@ export default function AssessmentChild() {
                 </Box>
               </>
             )}
-          </Box>
-        </>
+          </Box> */}
+        </Box>
       ) : (
         // Child Details Card
         <Box
@@ -314,37 +407,46 @@ export default function AssessmentChild() {
               ))}
             </List>
           </Drawer>
-          <Card
-            sx={{
-              textAlign: "center",
-              borderRadius: 4,
-              boxShadow: 5,
-              bgcolor: "#e0f7fa",
-            }}
+          <Box
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            flexDirection="column"
+            sx={{ ml: "300px" }}
           >
-            <CardContent>
-              <Typography variant="h4" sx={{ color: "#006064", mb: 2 }}>
-                {selectedChild.name}
+            <Paper
+              elevation={1}
+              sx={{
+                padding: 2,
+                borderRadius: 30,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 4,
+                backgroundColor: "background.paper",
+                minWidth: "70vh",
+              }}
+            >
+              <Typography variant="body1">
+                Name: {selectedChild.name}
               </Typography>
-              <Typography variant="h6" sx={{ color: "#004d40", mb: 1 }}>
-                Age: {selectedChild.age}
-              </Typography>
-              <Typography variant="h6" sx={{ color: "#004d40", mb: 3 }}>
+              <Typography variant="body1">Age: {selectedChild.age}</Typography>
+              <Typography variant="body1">
                 Grade: {selectedChild.grade}
               </Typography>
-              <Button
-                variant="contained"
-                sx={{
-                  bgcolor: "#00695c",
-                  color: "white",
-                  "&:hover": { bgcolor: "#004d40" },
-                }}
-                onClick={resetSelection}
-              >
-                Back to Select Child
-              </Button>
-            </CardContent>
-          </Card>
+            </Paper>
+            <Box
+              sx={{
+                minWidth: "900px",
+                borderRadius: 30,
+                gap: 4,
+                mt: 2,
+                backgroundColor: "background.paper",
+              }}
+            >
+              <ProgressStepper />
+            </Box>
+          </Box>
         </Box>
       )}
     </Box>
