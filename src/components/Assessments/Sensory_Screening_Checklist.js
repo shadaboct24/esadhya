@@ -19,7 +19,7 @@ import {
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { API_URL } from "../../Constants/api_url";
 
-const ChildDropdown = () => {
+const Sensory_assessment = ({ selectedChild }) => {
   const children = [
     { id: 1, name: "Abhishek", age: 7, grade: "2nd Grade" },
     { id: 2, name: "Babita", age: 9, grade: "4th Grade" },
@@ -66,13 +66,19 @@ const ChildDropdown = () => {
   };
 
   // Handle child selection change
-  const handleChange = async (event) => {
-    const childId = event.target.value;
-    setSelectedChildId(childId);
-    setResponses({});
-    setIsUpdating(false);
-    await checkExistingAssessment(childId);
-  };
+  useEffect(() => {
+    const handleChange = async () => {
+      try {
+        setSelectedChildId(selectedChild.id);
+        setResponses({});
+        setIsUpdating(false);
+        await checkExistingAssessment(selectedChild.id);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    handleChange();
+  }, []);
 
   // Handle update button click
   const handleUpdate = async () => {
@@ -117,9 +123,9 @@ const ChildDropdown = () => {
   // Generate and show PDF report
   const handleViewReport = async () => {
     try {
-      const selectedChild = children.find(
-        (child) => child.id === selectedChildId
-      );
+      // const selectedChild = children.find(
+      //   (child) => child.id === selectedChildId
+      // );
       const response = await axios.get(
         `${API_URL}/api/pdf/generate/${selectedChildId}?childName=${selectedChild.name}`,
         { responseType: "blob" }
@@ -171,7 +177,7 @@ const ChildDropdown = () => {
     }
   };
 
-  const selectedChild = children.find((child) => child.id === selectedChildId);
+  // const selectedChild = children.find((child) => child.id === selectedChildId);
 
   const responseOptions = [
     "Yes",
@@ -187,17 +193,18 @@ const ChildDropdown = () => {
         p: 3,
         border: "1px solid #ccc",
         borderRadius: "8px",
-        maxWidth: "800px",
+        minWidth: "800px",
         margin: "20px auto",
         boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
         backgroundColor: "#f9f9f9",
       }}
     >
       <Typography variant="h5" align="center" gutterBottom>
-        {isUpdating ? "Update Assessment" : "Select a Child"}
+        {/* {isUpdating ? "Update Assessment" : "Select a Child"} */}
+        This is Sensory Assessment
       </Typography>
 
-      <FormControl fullWidth>
+      {/* <FormControl fullWidth>
         <InputLabel id="child-select-label">Child</InputLabel>
         <Select
           labelId="child-select-label"
@@ -215,16 +222,16 @@ const ChildDropdown = () => {
             </MenuItem>
           ))}
         </Select>
-      </FormControl>
+      </FormControl> */}
 
       {selectedChild && (
         <Grid container spacing={3} sx={{ mt: 3 }}>
           <Grid item xs={12} md={4}>
             <Box sx={{ p: 2, border: "1px solid #ddd", borderRadius: "8px" }}>
-              <Typography variant="h6">Details:</Typography>
+              {/* <Typography variant="h6">Details:</Typography>
               <Typography>Name: {selectedChild.name}</Typography>
               <Typography>Age: {selectedChild.age}</Typography>
-              <Typography>Grade: {selectedChild.grade}</Typography>
+              <Typography>Grade: {selectedChild.grade}</Typography> */}
 
               {hasExistingAssessment && !isUpdating && (
                 <Box>
@@ -371,4 +378,4 @@ const ChildDropdown = () => {
   );
 };
 
-export default ChildDropdown;
+export default Sensory_assessment;

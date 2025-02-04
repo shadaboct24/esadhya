@@ -40,6 +40,8 @@ import {
 import SearchIcon from "@mui/icons-material/Search";
 import { Link } from "react-router-dom";
 import ProgressStepper from "../ProgressBar";
+import ReinforceAssessment from "./Reinforcement_assessment";
+import ShowAssessment from "./ShowAssessment";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -59,6 +61,14 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   },
   "&:last-child td, &:last-child th": {
     border: 0,
+  },
+  "&:hover": {
+    backgroundColor: theme.palette.primary.light + "33", // Adding transparency
+    cursor: "pointer",
+    transition: "background-color 0.2s ease",
+    "& .MuiTableCell-body": {
+      color: "black", // Maintaining text color on hover
+    },
   },
 }));
 
@@ -89,13 +99,50 @@ const SearchTextField = styled(TextField)({
 });
 
 export default function AssessmentChild() {
-  const navItems = [
-    { name: "ISAA", path: "/", icon: <Home /> },
-    { name: "Sensory Checklist", path: "/profile", icon: <Person /> },
-    { name: "Reinforce Assessment", path: "/settings", icon: <Settings /> },
-    { name: "IEP", path: "/documents", icon: <Description /> },
-    { name: "MDPS", path: "/logout", icon: <Logout /> },
-  ];
+  const navigationConfig = {
+    "child-profiling": {
+      title: "Child Profiling",
+      items: [
+        {
+          name: "Child Registration",
+          path: "/registration",
+          icon: <Home />,
+        },
+        { name: "Case History", path: "/case-history", icon: <Home /> },
+      ],
+    },
+    assessments: {
+      title: "Assessments",
+      items: [
+        { name: "ISAA", path: "/isaa", icon: <Home /> },
+        { name: "Reinforce", path: "/reinforce", icon: <Logout /> },
+        { name: "Sensory Assessment", path: "/sensory", icon: <Logout /> },
+        { name: "MDPS", path: "/mdps", icon: <Person /> },
+        { name: "FACP", path: "/facp", icon: <Settings /> },
+        { name: "GLAD", path: "/glad", icon: <Description /> },
+      ],
+    },
+    diagnosis: {
+      title: "Diagnosis",
+      items: [
+        { name: "MCHAT", path: "/mchat", icon: <Home /> },
+        { name: "Pedigree Chart", path: "/pedigree", icon: <Home /> },
+        { name: "DST Chart", path: "/dst", icon: <Home /> },
+      ],
+    },
+    iep: {
+      title: "IEP",
+      items: [
+        { name: "Lesson Plan", path: "/lesson-plan", icon: <Home /> },
+        { name: "Annual Plan", path: "/annual-plan", icon: <Home /> },
+        {
+          name: "Semi Annual Plan",
+          path: "/semi-annual-plan",
+          icon: <Home />,
+        },
+      ],
+    },
+  };
   const children = [
     { id: 1, name: "Abhishek", age: 7, grade: "2nd Grade" },
     { id: 2, name: "Babita", age: 9, grade: "4th Grade" },
@@ -116,6 +163,8 @@ export default function AssessmentChild() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredChildren, setFilteredChildren] = useState(children);
   const [hoveredRowId, setHoveredRowId] = useState(null);
+  const [currentSection, setCurrentSection] = useState("child-profiling");
+  const [assessmentType, setAssessmentType] = useState("Reinforce");
 
   useEffect(() => {
     const filtered = children.filter((child) => {
@@ -152,7 +201,9 @@ export default function AssessmentChild() {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
-
+  const handleRowClick = (child) => {
+    confirmChild(child);
+  };
   return (
     <Box
       sx={{
@@ -191,9 +242,8 @@ export default function AssessmentChild() {
           >
             <Table sx={{ minWidth: 400 }} aria-label="customized table">
               <TableHead>
-                {/* Full-width search row */}
                 <TableRow>
-                  <StyledTableCell colSpan={4} sx={{ padding: 1 }}>
+                  <StyledTableCell colSpan={3} sx={{ padding: 1 }}>
                     <SearchTextField
                       size="small"
                       placeholder="Search by ID or Name"
@@ -215,24 +265,26 @@ export default function AssessmentChild() {
                     />
                   </StyledTableCell>
                 </TableRow>
-
-                {/* Column headers */}
-                <TableRow sx={{ bgcolor: "ButtonHighlight" }}>
+                <TableRow>
                   <StyledTableCell>Child ID</StyledTableCell>
                   <StyledTableCell align="left">Name</StyledTableCell>
                   <StyledTableCell align="left">Grade</StyledTableCell>
-                  <StyledTableCell align="center">Actions</StyledTableCell>
                 </TableRow>
               </TableHead>
-
               <TableBody>
                 {filteredChildren
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((child) => (
                     <StyledTableRow
                       key={child.id}
-                      onMouseEnter={() => setHoveredRowId(child.id)}
-                      onMouseLeave={() => setHoveredRowId(null)}
+                      onClick={() => handleRowClick(child)}
+                      sx={{
+                        "&:hover td": {
+                          backgroundColor: "primary.light",
+                          opacity: 1,
+                          color: "black !important",
+                        },
+                      }}
                     >
                       <StyledTableCell>{child.id}</StyledTableCell>
                       <StyledTableCell align="left">
@@ -241,25 +293,10 @@ export default function AssessmentChild() {
                       <StyledTableCell align="left">
                         {child.grade}
                       </StyledTableCell>
-                      <StyledTableCell align="center">
-                        {hoveredRowId === child.id && (
-                          <Button
-                            variant="contained"
-                            size="small"
-                            onClick={(e) => {
-                              e.stopPropagation(); // Prevents unintended row selection
-                              confirmChild(child);
-                            }}
-                          >
-                            Proceed
-                          </Button>
-                        )}
-                      </StyledTableCell>
                     </StyledTableRow>
                   ))}
               </TableBody>
             </Table>
-
             <TablePagination
               rowsPerPageOptions={[5, 10, 15]}
               component="div"
@@ -292,6 +329,9 @@ export default function AssessmentChild() {
                 backgroundColor: "#1e293b",
                 color: "white",
                 borderRadius: "24px",
+                maxHeight: "500px",
+                ml: 2,
+                mt: 2,
               },
             }}
           >
@@ -302,14 +342,15 @@ export default function AssessmentChild() {
                 component="div"
                 sx={{ mx: "auto" }}
               >
-                AssessMents
+                {navigationConfig[currentSection].title}
               </Typography>
             </Toolbar>
             <List>
-              {navItems.map((item) => (
+              {navigationConfig[currentSection].items.map((item) => (
                 <Link
                   key={item.name}
-                  to={item.path}
+                  //to={item.path}
+                  onClick={() => setAssessmentType(item.name)}
                   style={{ textDecoration: "none", color: "inherit" }}
                 >
                   <ListItem
@@ -353,6 +394,16 @@ export default function AssessmentChild() {
                 Grade: {selectedChild.grade}
               </Typography>
             </Paper>
+            <Button
+              variant="contained"
+              onClick={() => {
+                setIsChildConfirmed(false);
+                setCurrentSection("child-profiling");
+              }}
+              sx={{ mt: 1 }}
+            >
+              Chnage child
+            </Button>
             <Box
               sx={{
                 minWidth: "900px",
@@ -362,8 +413,13 @@ export default function AssessmentChild() {
                 backgroundColor: "background.paper",
               }}
             >
-              <ProgressStepper />
+              <ProgressStepper setCurrentSection={setCurrentSection} />
             </Box>
+            {/* <ReinforceAssessment selectedChild={selectedChild} /> */}
+            <ShowAssessment
+              assessmentType={assessmentType}
+              selectedChild={selectedChild}
+            />
           </Box>
         </Box>
       )}

@@ -23,7 +23,7 @@ import {
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { API_URL } from "../../Constants/api_url";
 
-const ReinforceAssessment = () => {
+const ReinforceAssessment = ({ selectedChild }) => {
   const children = [
     { id: 1, name: "Abhishek", age: 7, grade: "2nd Grade" },
     { id: 2, name: "Babita", age: 9, grade: "4th Grade" },
@@ -58,11 +58,26 @@ const ReinforceAssessment = () => {
     fetchQuestions();
   }, []);
 
+  useEffect(() => {
+    const handlechange = async () => {
+      try {
+        setSelectedChildId(selectedChild.id);
+        setResponses({});
+        setIsUpdating(false);
+        console.log("id is:", selectedChildId);
+        await checkExistingAssessment(selectedChild.id);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    handlechange();
+  }, []);
+
   // Fetch existing assessment for a child
-  const fetchExistingAssessment = async (childId) => {
+  const fetchExistingAssessment = async (selectedChildId) => {
     try {
       const response = await axios.get(
-        `${API_URL}/api/reinforce-assessments/child/${childId}`
+        `${API_URL}/api/reinforce-assessments/child/${selectedChildId}`
       );
 
       // if (response.data && response.data.responses) {
@@ -89,10 +104,10 @@ const ReinforceAssessment = () => {
   };
 
   // Check if child has existing assessment
-  const checkExistingAssessment = async (childId) => {
+  const checkExistingAssessment = async (selectedChildId) => {
     try {
       const response = await axios.get(
-        `${API_URL}/api/reinforce-assessments/child/${childId}`
+        `${API_URL}/api/reinforce-assessments/child/${selectedChildId}`
       );
       const hasExisting = response.data.responses.response.length > 0;
       setHasExistingAssessment(hasExisting);
@@ -126,9 +141,9 @@ const ReinforceAssessment = () => {
 
   const handleViewReport = async () => {
     try {
-      const selectedChild = children.find(
-        (child) => child.id === selectedChildId
-      );
+      // const selectedChild = children.find(
+      //   (child) => child.id === selectedChildId
+      // );
       const response = await axios.get(
         `${API_URL}/api/reinforce-assessments/generate/${selectedChildId}?childName=${selectedChild.name}`, //chnages it
         { responseType: "blob" }
@@ -243,7 +258,7 @@ const ReinforceAssessment = () => {
       <>
         {descriptiveQuestions.map(renderDescriptiveQuestion)}
         {selectiveQuestions.length > 0 && (
-          <Box sx={{ mt: 3 }}>
+          <Box sx={{ mt: 3, minWidth: "800px" }}>
             {renderSelectiveQuestions(selectiveQuestions)}
           </Box>
         )}
@@ -251,7 +266,7 @@ const ReinforceAssessment = () => {
     );
   };
 
-  const selectedChild = children.find((child) => child.id === selectedChildId);
+  //const selectedChild = children.find((child) => child.id === selectedChildId);
 
   return (
     <Box
@@ -259,17 +274,19 @@ const ReinforceAssessment = () => {
         p: 3,
         border: "1px solid #ccc",
         borderRadius: "8px",
-        maxWidth: "800px",
+        minWidth: "800px",
+        maxWidth: "1200px",
         margin: "20px auto",
         boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
         backgroundColor: "#f9f9f9",
       }}
     >
       <Typography variant="h5" align="center" gutterBottom>
-        {isUpdating ? "Update Assessment" : "Select a Child"}
+        {/* {isUpdating ? "Update Assessment" : "Choose One"} */}
+        This is Reinforce Assessment
       </Typography>
 
-      <FormControl fullWidth sx={{ mb: 3 }}>
+      {/* <FormControl fullWidth sx={{ mb: 3 }}>
         <InputLabel>Select Child</InputLabel>
         <Select
           label="child select"
@@ -283,16 +300,16 @@ const ReinforceAssessment = () => {
             </MenuItem>
           ))}
         </Select>
-      </FormControl>
+      </FormControl> */}
 
       {selectedChild && (
         <Grid container spacing={3} sx={{ mt: 3 }}>
           <Grid item xs={12} md={4}>
             <Box sx={{ p: 2, border: "1px solid #ddd", borderRadius: "8px" }}>
-              <Typography variant="h6">Child Details</Typography>
+              {/* <Typography variant="h6">Child Details</Typography>
               <Typography>Name: {selectedChild.name}</Typography>
               <Typography>Age: {selectedChild.age}</Typography>
-              <Typography>Grade: {selectedChild.grade}</Typography>
+              <Typography>Grade: {selectedChild.grade}</Typography> */}
 
               {hasExistingAssessment && !isUpdating && (
                 <Box sx={{ mt: 2 }}>

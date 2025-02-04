@@ -14,14 +14,14 @@ const theme = createTheme({
   },
 });
 
-const ProgressStepper = () => {
+const ProgressStepper = ({ setCurrentSection }) => {
   const [activeStep, setActiveStep] = useState(0);
-
+  const chnageProgress = () => {};
   const steps = [
-    { label: "Child Profiling", id: 0 },
-    { label: "Assessments", id: 1 },
-    { label: "Diagnosis", id: 2 },
-    { label: "IEP", id: 3 },
+    { label: "child-profiling", id: 0 },
+    { label: "assessments", id: 1 },
+    { label: "diagnosis", id: 2 },
+    { label: "iep", id: 3 },
   ];
 
   return (
@@ -37,7 +37,10 @@ const ProgressStepper = () => {
         {steps.map((step, index) => (
           <Box
             key={step.id}
-            onClick={() => setActiveStep(index)}
+            onClick={() => {
+              setActiveStep(index);
+              setCurrentSection(steps[index].label);
+            }}
             sx={{
               flex: 1,
               height: "48px",
