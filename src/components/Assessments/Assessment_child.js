@@ -43,6 +43,7 @@ import ProgressStepper from "../ProgressBar";
 import ReinforceAssessment from "./Reinforcement_assessment";
 import ShowAssessment from "./ShowAssessment";
 import ChildRegistration from "./ChildRegistration";
+import Tables from "./Tables";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {

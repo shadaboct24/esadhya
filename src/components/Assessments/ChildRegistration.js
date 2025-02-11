@@ -26,8 +26,9 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import dayjs from "dayjs";
 
-const ChildRegistration = () => {
+const ChildRegistration = ({ selectedChild }) => {
   const [locations, setLocations] = useState([]);
   const [selectedCountry, setSelectedCountry] = useState("");
   const [selectedState, setSelectedState] = useState("");
@@ -35,14 +36,76 @@ const ChildRegistration = () => {
   const [states, setStates] = useState([]);
   const [districts, setDistricts] = useState([]);
 
+  const mapBackendToFormData = (backendData) => {
+    // Create a new object based on initialFormState structure
+    // and fill it with backend data where available
+    return {
+      fullname: backendData.fullname || "",
+      username: backendData.username || "",
+      password: backendData.password || "",
+      confirmPassword: backendData.password || "", // Note: you might want to handle this differently
+      gender: backendData.gender || "",
+      dateOfBirth: backendData.dateOfBirth
+        ? dayjs(backendData.dateOfBirth)
+        : null,
+      registrationNo: backendData.registrationNo || "",
+      email: backendData.email || "",
+      contactNo: backendData.contactNo || "",
+      street: backendData.street || "",
+      country: backendData.country || "",
+      state: backendData.state || "",
+      district: backendData.district || "",
+      belonging: backendData.belonging || "",
+      cityOrMandal: backendData.cityOrMandal || "",
+      houseNo: backendData.houseNo || "",
+      address: backendData.address || "",
+      class_s: backendData.class_s || "",
+      academicYear: backendData.academicYear || "",
+      parentId: backendData.parentId || "",
+    };
+  };
+
   useEffect(() => {
     axios
       .get(`${API_URL}/countries`)
       .then((response) => {
         setLocations(response.data);
+        const locat = response.data;
+        axios
+          .get(`${API_URL}/api/ischildexist/${selectedChild.id}`)
+          .then((response) => {
+            if (response.data) {
+              const mappedData = mapBackendToFormData(response.data);
+              setFormData(mappedData);
+              setSelectedCountry(mappedData.country);
+              setSelectedState(mappedData.state);
+              setSelectedDistrict(mappedData.district);
+
+              const countrydata = locat.find(
+                (loc) => loc.country == mappedData.country
+              );
+              setStates(countrydata?.states || []);
+              const statedata = countrydata?.states.find(
+                (st) => st.state == mappedData.state
+              );
+              setDistricts(statedata?.districts || []);
+            }
+          })
+          .catch((error) => {
+            console.error("Error fetching child data:", error);
+          });
       })
       .catch((error) => console.error("error fetching data:", error));
-  }, []);
+  }, [selectedChild.id]);
+
+  // useEffect(() => {
+  //   axios
+  //     .get(`${API_URL}/countries`)
+  //     .then((response) => {
+  //       setLocations(response.data);
+  //     })
+  //     .catch((error) => console.error("error fetching data:", error));
+  // }, []);
 
   const handleCountryChange = (event) => {
     const country = event.target.value;
@@ -105,6 +168,8 @@ const ChildRegistration = () => {
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [file, setFile] = useState(null);
+  const [ischildexist, setIsChildExist] = useState(false);
+  const [isupdating, setIsUpdating] = useState(false);
 
   // Validation patterns
   const patterns = {

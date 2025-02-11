@@ -2,7 +2,6 @@ import React from "react";
 import ReinforceAssessment from "./Reinforcement_assessment";
 import ISAA from "./ISAA";
 import Sensory_assessment from "./Sensory_Screening_Checklist";
-import { Typography } from "@mui/material";
 import ChildRegistration from "./ChildRegistration";
 
 export default function ShowAssessment({
@@ -23,7 +22,9 @@ export default function ShowAssessment({
           <Sensory_assessment selectedChild={selectedChild} />
         )}
       {currentSection === "child-profiling" &&
-        assessmentType === "Child Registration" && <ChildRegistration />}
+        assessmentType === "Child Registration" && (
+          <ChildRegistration selectedChild={selectedChild} />
+        )}
     </>
   );
 }
