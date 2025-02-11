@@ -53,9 +53,9 @@ function Navbar() {
     { text: "Login", icon: <LoginIcon />, to: "/signin" },
     { text: "New School Registration", icon: <SchoolIcon />, to: "/newreg" },
     { text: "Dashboard", icon: <DashboardIcon />, to: "/dashboard" },
-    { text: "Sensory Scrr", icon: <DashboardIcon />, to: "/sensoryscreening" },
-    { text: "ISAA", icon: <DashboardIcon />, to: "/isaa" },
-    { text: "Reinforce", icon: <DashboardIcon />, to: "/reinforce" },
+    // { text: "Sensory Scrr", icon: <DashboardIcon />, to: "/sensoryscreening" },
+    // { text: "ISAA", icon: <DashboardIcon />, to: "/isaa" },
+    // { text: "Reinforce", icon: <DashboardIcon />, to: "/reinforce" },
     { text: "Assessments", icon: <DashboardIcon />, to: "/assessment_child" },
   ];
 

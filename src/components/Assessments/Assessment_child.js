@@ -42,6 +42,7 @@ import { Link } from "react-router-dom";
 import ProgressStepper from "../ProgressBar";
 import ReinforceAssessment from "./Reinforcement_assessment";
 import ShowAssessment from "./ShowAssessment";
+import ChildRegistration from "./ChildRegistration";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -203,6 +204,7 @@ export default function AssessmentChild() {
   };
   const handleRowClick = (child) => {
     confirmChild(child);
+    setAssessmentType("");
   };
   return (
     <Box
@@ -321,6 +323,7 @@ export default function AssessmentChild() {
           <Drawer
             variant="permanent"
             sx={{
+              flexGrow: 1,
               width: 240,
               flexShrink: 0,
               "& .MuiDrawer-paper": {
@@ -402,7 +405,7 @@ export default function AssessmentChild() {
               }}
               sx={{ mt: 1 }}
             >
-              Chnage child
+              Change child
             </Button>
             <Box
               sx={{
@@ -416,10 +419,17 @@ export default function AssessmentChild() {
               <ProgressStepper setCurrentSection={setCurrentSection} />
             </Box>
             {/* <ReinforceAssessment selectedChild={selectedChild} /> */}
+            <Typography>
+              {currentSection} {assessmentType}
+            </Typography>
+            {/* {currentSection === "assessments" && ( */}
             <ShowAssessment
               assessmentType={assessmentType}
               selectedChild={selectedChild}
+              currentSection={currentSection}
             />
+            {/* )} */}
+            {/* <ChildRegistration /> */}
           </Box>
         </Box>
       )}
