@@ -22,7 +22,7 @@ export default function ShowAssessment({
           <Sensory_assessment selectedChild={selectedChild} />
         )}
       {currentSection === "child-profiling" &&
-        assessmentType === "Child Registration" && (
+        assessmentType === "Update Child Details" && (
           <ChildRegistration selectedChild={selectedChild} />
         )}
     </>

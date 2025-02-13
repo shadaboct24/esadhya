@@ -43,7 +43,10 @@ import ProgressStepper from "../ProgressBar";
 import ReinforceAssessment from "./Reinforcement_assessment";
 import ShowAssessment from "./ShowAssessment";
 import ChildRegistration from "./ChildRegistration";
-import Tables from "./Tables";
+import ControlPointIcon from "@mui/icons-material/ControlPoint";
+import Modal from "@mui/material/Modal";
+import IconButton from "@mui/material/IconButton";
+import CloseIcon from "@mui/icons-material/Close";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -106,7 +109,7 @@ export default function AssessmentChild() {
       title: "Child Profiling",
       items: [
         {
-          name: "Child Registration",
+          name: "Update Child Details",
           path: "/registration",
           icon: <Home />,
         },
@@ -207,13 +210,37 @@ export default function AssessmentChild() {
     confirmChild(child);
     setAssessmentType("");
   };
+  const style = {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    width: {
+      xs: "90%", // On extra-small devices
+      sm: "80%", // On small devices
+      md: "70%", // On medium devices
+      lg: "60%", // On large devices
+    },
+    maxHeight: "90vh", // Maximum height of 90% of viewport height
+    bgcolor: "background.paper",
+    boxShadow: 24,
+    borderRadius: 2,
+    overflowY: "auto", // Enable vertical scrolling
+    "&:focus": {
+      outline: "none", // Remove focus outline
+    },
+  };
+
+  const [open, setOpen] = useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
   return (
     <Box
       sx={{
         margin: 2,
         p: 4,
         minHeight: "55vh",
-        width: "200vh",
+        //width: "200vh",
         display: "flex",
         flexDirection: "row",
         alignItems: "flex-start",
@@ -260,12 +287,19 @@ export default function AssessmentChild() {
                         ),
                       }}
                       sx={{
-                        width: "100%",
+                        width: "75%",
                         "& .MuiOutlinedInput-root": {
                           height: "35px",
                         },
                       }}
                     />
+                    <Button
+                      variant="contained"
+                      onClick={handleOpen}
+                      sx={{ ml: 1, backgroundColor: "#000000" }}
+                    >
+                      Register New Child
+                    </Button>
                   </StyledTableCell>
                 </TableRow>
                 <TableRow>
@@ -310,6 +344,33 @@ export default function AssessmentChild() {
               onRowsPerPageChange={handleChangeRowsPerPage}
             />
           </TableContainer>
+          <div>
+            {/* <Button onClick={handleOpen}>
+              <ControlPointIcon />
+            </Button> */}
+            <Modal
+              open={open}
+              onClose={handleClose}
+              aria-labelledby="modal-title"
+              aria-describedby="modal-description"
+            >
+              <Box sx={style}>
+                <IconButton
+                  aria-label="close"
+                  onClick={handleClose}
+                  sx={{
+                    position: "absolute",
+                    right: 8,
+                    top: 8,
+                  }}
+                >
+                  <CloseIcon />
+                </IconButton>
+
+                <ChildRegistration handleClose={handleClose} />
+              </Box>
+            </Modal>
+          </div>
         </Box>
       ) : (
         // Child Details Card

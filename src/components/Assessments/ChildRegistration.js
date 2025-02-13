@@ -28,13 +28,16 @@ import {
 } from "@mui/material";
 import dayjs from "dayjs";
 
-const ChildRegistration = ({ selectedChild }) => {
+const ChildRegistration = ({ selectedChild, handleClose }) => {
   const [locations, setLocations] = useState([]);
   const [selectedCountry, setSelectedCountry] = useState("");
   const [selectedState, setSelectedState] = useState("");
   const [selectedDistrict, setSelectedDistrict] = useState("");
   const [states, setStates] = useState([]);
   const [districts, setDistricts] = useState([]);
+
+  const [ischildexist, setIsChildExist] = useState(false);
+  const [isupdating, setIsUpdating] = useState(false);
 
   const mapBackendToFormData = (backendData) => {
     // Create a new object based on initialFormState structure
@@ -76,6 +79,7 @@ const ChildRegistration = ({ selectedChild }) => {
           .then((response) => {
             if (response.data) {
               const mappedData = mapBackendToFormData(response.data);
+              setIsChildExist(true);
               setFormData(mappedData);
               setSelectedCountry(mappedData.country);
               setSelectedState(mappedData.state);
@@ -96,7 +100,7 @@ const ChildRegistration = ({ selectedChild }) => {
           });
       })
       .catch((error) => console.error("error fetching data:", error));
-  }, [selectedChild.id]);
+  }, [selectedChild]);
 
   // useEffect(() => {
   //   axios
@@ -168,8 +172,6 @@ const ChildRegistration = ({ selectedChild }) => {
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [file, setFile] = useState(null);
-  const [ischildexist, setIsChildExist] = useState(false);
-  const [isupdating, setIsUpdating] = useState(false);
 
   // Validation patterns
   const patterns = {
@@ -249,7 +251,17 @@ const ChildRegistration = ({ selectedChild }) => {
       const error = validateField(key, formData[key]);
       if (error) formErrors[key] = error;
     });
-
+    axios
+      .get(`${API_URL}/api/ischildexist/${formData.registrationNo}`)
+      .then((response) => {
+        if (response.data) {
+          alert("Registration No is already registered");
+          return;
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
     if (Object.keys(formErrors).length > 0) {
       alert("there are errors");
       console.log(formErrors);
@@ -284,7 +296,7 @@ const ChildRegistration = ({ selectedChild }) => {
         .request(config)
         .then((response) => {
           if (response.data) {
-            toast.success("Success! Your Number Verified ", {
+            toast.success("Success! form is submitted ", {
               position: "top-right",
               autoClose: 5000,
               hideProgressBar: false,
@@ -313,6 +325,7 @@ const ChildRegistration = ({ selectedChild }) => {
       // setFormData(initialFormState);
       setFile(null);
       setErrors({});
+      handleClose();
 
       // Show success message
       alert("Registration successful!");
@@ -433,7 +446,10 @@ const ChildRegistration = ({ selectedChild }) => {
                 label="Date of Birth"
                 value={formData.dateOfBirth}
                 onChange={(newValue) => {
-                  setFormData((prev) => ({ ...prev, dateOfBirth: newValue }));
+                  setFormData((prev) => ({
+                    ...prev,
+                    dateOfBirth: newValue,
+                  }));
                 }}
                 renderInput={(params) => <TextField {...params} fullWidth />}
                 sx={{ flex: 1, width: "100%" }}
@@ -726,7 +742,7 @@ const ChildRegistration = ({ selectedChild }) => {
                 size="large"
                 fullWidth
               >
-                Submit Registration
+                Submit
               </Button>
             </Grid>
           </Grid>
