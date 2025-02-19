@@ -660,7 +660,7 @@ const NewAdmissionForm = () => {
         sx={{
           width: "80vw",
           marginTop: "5vh",
-          backgroundColor: "#e1e0d9",
+          backgroundColor: "rgba(255, 255, 255, 0.3)",
           marginLeft: "10vw",
         }}
       >

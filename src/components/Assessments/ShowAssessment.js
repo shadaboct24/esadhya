@@ -3,6 +3,7 @@ import ReinforceAssessment from "./Reinforcement_assessment";
 import ISAA from "./ISAA";
 import Sensory_assessment from "./Sensory_Screening_Checklist";
 import ChildRegistration from "./ChildRegistration";
+import ChildCaseHistory from "./ChildCaseHistory";
 
 export default function ShowAssessment({
   assessmentType,
@@ -25,6 +26,8 @@ export default function ShowAssessment({
         assessmentType === "Update Child Details" && (
           <ChildRegistration selectedChild={selectedChild} />
         )}
+      {currentSection === "child-profiling" &&
+        assessmentType === "Case History" && <ChildCaseHistory />}
     </>
   );
 }
