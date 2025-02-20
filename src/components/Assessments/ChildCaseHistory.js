@@ -52,7 +52,7 @@ function ChildCaseHistory() {
                 fullWidth
                 name="select child"
                 label="select child"
-                value={formdata.child}
+                value={formdata.child} // put the value from selected child prop
               >
                 <MenuItem value="">Select child</MenuItem>
                 <MenuItem value="abhishek">abhishek</MenuItem>
@@ -63,7 +63,8 @@ function ChildCaseHistory() {
               <Grid item xs={12} sm={6}>
                 <DatePicker
                   label="Date"
-                  value={formdata.date}
+                  name="assessmentdate"
+                  value={formdata.assessmentdate} // enter mannualy
                   sx={{ flex: 1, width: "100%" }}
                 />
               </Grid>
@@ -74,14 +75,14 @@ function ChildCaseHistory() {
                 fullWidth
                 name="name"
                 label="Name"
-                value={formdata.name}
+                value={formdata.name} // from selected child
               />
             </Grid>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <Grid item xs={12} sm={6}>
                 <DatePicker
                   label="Date of birth"
-                  value={formdata.dob}
+                  value={formdata.dob} // from selected child
                   sx={{ flex: 1, width: "100%" }}
                 />
               </Grid>
@@ -90,9 +91,9 @@ function ChildCaseHistory() {
               <TextField
                 fullWidth
                 required
-                name="registyration no"
+                name="registrationNo"
                 label="Registration No"
-                value={formdata.regNo}
+                value={formdata.registrationNo}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -123,7 +124,7 @@ function ChildCaseHistory() {
               <TextField
                 required
                 fullWidth
-                name=" education"
+                name="education"
                 label="Education"
                 value={formdata.education}
               />
@@ -132,9 +133,9 @@ function ChildCaseHistory() {
               <TextField
                 required
                 fullWidth
-                name="ref by"
+                name="refBy"
                 label="Ref By"
-                value={formdata.refby}
+                value={formdata.refBy}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -150,7 +151,7 @@ function ChildCaseHistory() {
               <TextField
                 required
                 fullWidth
-                name=" language spoken"
+                name=" languagespoken"
                 label="Language Spoken"
                 value={formdata.languagespoken}
               />
@@ -159,7 +160,7 @@ function ChildCaseHistory() {
               <TextField
                 required
                 fullWidth
-                name="any other language"
+                name="otherlanguagespoken"
                 label="Any other Language Spoken"
                 value={formdata.otherlanguagespoken}
               />
@@ -207,7 +208,7 @@ function ChildCaseHistory() {
                 fullWidth
                 name="fathereducation"
                 label="Father Eduaction"
-                value={formdata.name}
+                value={formdata.fathereducation}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -259,9 +260,9 @@ function ChildCaseHistory() {
               <TextField
                 required
                 fullWidth
-                name="income"
+                name="familyincome"
                 label="Family Income"
-                value={formdata.income}
+                value={formdata.familyincome}
               />
             </Grid>
           </Grid>
@@ -290,9 +291,9 @@ function ChildCaseHistory() {
               <TextField
                 required
                 fullWidth
-                name="historypre-natal"
+                name="natalhistory"
                 label="History Pre-natal, Natal, Postnatal"
-                value={formdata.historyprenatal}
+                value={formdata.natalhistory}
                 multiline
                 maxRows={5}
               />
@@ -314,7 +315,7 @@ function ChildCaseHistory() {
                 <input
                   type="file"
                   hidden
-                  accept="image/*"
+                  accept="image/*" //configure the file to be upload
                   // onChange={handleFileChange}
                 />
               </Button>
@@ -337,7 +338,8 @@ function ChildCaseHistory() {
                 fullWidth
                 size="small"
                 placeholder="Age"
-                value={formdata.developmentHistory?.neckHolding || ""}
+                name="nectholdingage"
+                value={formdata.neckholdingage}
               />
             </Grid>
 
@@ -349,7 +351,8 @@ function ChildCaseHistory() {
                 fullWidth
                 size="small"
                 placeholder="Age"
-                value={formdata.developmentHistory?.sitting || ""}
+                name="sittingage"
+                value={formdata.sittingage}
               />
             </Grid>
 
@@ -361,7 +364,8 @@ function ChildCaseHistory() {
                 fullWidth
                 size="small"
                 placeholder="Age"
-                value={formdata.developmentHistory?.walking || ""}
+                name="walkingage"
+                value={formdata.walkingage}
               />
             </Grid>
 
@@ -374,7 +378,8 @@ function ChildCaseHistory() {
                 fullWidth
                 size="small"
                 placeholder="For Autism"
-                value={formdata.developmentHistory?.firstWords || ""}
+                name="firstwordautism"
+                value={formdata.firstwordautism}
               />
             </Grid>
             <Grid item xs={4}>
@@ -382,7 +387,8 @@ function ChildCaseHistory() {
                 fullWidth
                 size="small"
                 placeholder="Age"
-                value={formdata.developmentHistory?.firstWords || ""}
+                name="firstwordage"
+                value={formdata.firstwordage}
               />
             </Grid>
 
@@ -394,7 +400,8 @@ function ChildCaseHistory() {
                 fullWidth
                 size="small"
                 placeholder="For Autism"
-                value={formdata.developmentHistory?.firstWords || ""}
+                name="twowordphrasesautism"
+                value={formdata.twowordphrasesautism}
               />
             </Grid>
             <Grid item xs={4}>
@@ -402,7 +409,8 @@ function ChildCaseHistory() {
                 fullWidth
                 size="small"
                 placeholder="Age"
-                value={formdata.developmentHistory?.firstWords || ""}
+                name="twowordphrasesage"
+                value={formdata.twowordphrasesage}
               />
             </Grid>
 
@@ -414,7 +422,8 @@ function ChildCaseHistory() {
                 fullWidth
                 size="small"
                 placeholder="For Autism"
-                value={formdata.developmentHistory?.firstWords || ""}
+                name="sentenceautism"
+                value={formdata.sentenceautism}
               />
             </Grid>
             <Grid item xs={4}>
@@ -422,7 +431,8 @@ function ChildCaseHistory() {
                 fullWidth
                 size="small"
                 placeholder="Age"
-                value={formdata.developmentHistory?.firstWords || ""}
+                name="sentenceage"
+                value={formdata.sentenceage}
               />
             </Grid>
 
@@ -434,7 +444,8 @@ function ChildCaseHistory() {
                 fullWidth
                 size="small"
                 placeholder="Age"
-                value={formdata.developmentHistory?.toiletControl || ""}
+                name="toiletcontrolage"
+                value={formdata.toiletcontrolage}
               />
             </Grid>
 
@@ -444,10 +455,8 @@ function ChildCaseHistory() {
             <Grid item xs={4}>
               <RadioGroup
                 row
-                value={
-                  formdata.developmentHistory?.monetaryTransaction?.toString() ||
-                  "false"
-                }
+                name="monetarytranc"
+                value={formdata.monetarytranc}
               >
                 <FormControlLabel
                   value="true"
@@ -468,10 +477,8 @@ function ChildCaseHistory() {
             <Grid item xs={4}>
               <RadioGroup
                 row
-                value={
-                  formdata.developmentHistory?.avoidsHazards?.toString() ||
-                  "false"
-                }
+                name="avoidsimplehazard"
+                value={formdata.avoidsimplehazard}
               >
                 <FormControlLabel
                   value="true"
@@ -494,10 +501,8 @@ function ChildCaseHistory() {
             <Grid item xs={4}>
               <RadioGroup
                 row
-                value={
-                  formdata.developmentHistory?.schoolProblems?.toString() ||
-                  "false"
-                }
+                name="probleminschool"
+                value={formdata.probleminschool}
               >
                 <FormControlLabel
                   value="true"
@@ -518,10 +523,8 @@ function ChildCaseHistory() {
             <Grid item xs={4}>
               <RadioGroup
                 row
-                value={
-                  formdata.developmentHistory?.physicalDeformity?.toString() ||
-                  "false"
-                }
+                name="physicaldeformity"
+                value={formdata.physicaldeformity}
               >
                 <FormControlLabel
                   value="true"
@@ -542,10 +545,8 @@ function ChildCaseHistory() {
             <Grid item xs={4}>
               <RadioGroup
                 row
-                value={
-                  formdata.developmentHistory?.sensoryImpairments?.toString() ||
-                  "false"
-                }
+                name="sensoryimpairments"
+                value={formdata.sensoryimpairments}
               >
                 <FormControlLabel
                   value="true"
@@ -564,10 +565,7 @@ function ChildCaseHistory() {
               <Typography>m) Fits</Typography>
             </Grid>
             <Grid item xs={4}>
-              <RadioGroup
-                row
-                value={formdata.developmentHistory?.fits?.toString() || "false"}
-              >
+              <RadioGroup row name="fits" value={formdata.fits}>
                 <FormControlLabel
                   value="true"
                   control={<Radio size="small" />}
@@ -841,7 +839,7 @@ function ChildCaseHistory() {
                   select
                   required
                   fullWidth
-                  name="tone"
+                  name="rultone"
                   label="Tone"
                   value={formdata.rultone}
                 >
@@ -856,7 +854,7 @@ function ChildCaseHistory() {
                   select
                   fullWidth
                   required
-                  name="power"
+                  name="rulpower"
                   label="Power"
                   value={formdata.rulpower}
                 >
@@ -872,7 +870,7 @@ function ChildCaseHistory() {
                 <TextField
                   required
                   fullWidth
-                  name="nutrition"
+                  name="rulnutrition"
                   label="Nutrition"
                   value={formdata.rulnutrition}
                 />
@@ -881,18 +879,18 @@ function ChildCaseHistory() {
                 <TextField
                   required
                   fullWidth
-                  name="Co-ordination"
+                  name="rulcoordination"
                   label="Co-ordination"
-                  value={formdata.rulCoordination}
+                  value={formdata.rulcoordination}
                 />
               </Grid>
               <Grid item xs={2}>
                 <TextField
                   required
                   fullWidth
-                  name="Abnormal involuntary movement"
+                  name="rulabnormalinvoluntarymovement"
                   label="Abnormal involuntary movement"
-                  value={formdata.rulAbnormalinvoluntarymovement}
+                  value={formdata.rulabnormalinvoluntarymovement}
                 />
               </Grid>
             </>
@@ -906,7 +904,7 @@ function ChildCaseHistory() {
                   select
                   required
                   fullWidth
-                  name="tone"
+                  name="rlltone"
                   label="Tone"
                   value={formdata.rlltone}
                 >
@@ -921,7 +919,7 @@ function ChildCaseHistory() {
                   select
                   fullWidth
                   required
-                  name="power"
+                  name="rllpower"
                   label="Power"
                   value={formdata.rllpower}
                 >
@@ -937,7 +935,7 @@ function ChildCaseHistory() {
                 <TextField
                   required
                   fullWidth
-                  name="nutrition"
+                  name="rllnutrition"
                   label="Nutrition"
                   value={formdata.rllnutrition}
                 />
@@ -946,18 +944,18 @@ function ChildCaseHistory() {
                 <TextField
                   required
                   fullWidth
-                  name="Co-ordination"
+                  name="rllcoordination"
                   label="Co-ordination"
-                  value={formdata.rllCoordination}
+                  value={formdata.rllcoordination}
                 />
               </Grid>
               <Grid item xs={2}>
                 <TextField
                   required
                   fullWidth
-                  name="Abnormal involuntary movement"
+                  name="rllabnormalinvoluntarymovement"
                   label="Abnormal involuntary movement"
-                  value={formdata.rllAbnormalinvoluntarymovement}
+                  value={formdata.rllabnormalinvoluntarymovement}
                 />
               </Grid>
             </>
@@ -970,7 +968,7 @@ function ChildCaseHistory() {
                   select
                   required
                   fullWidth
-                  name="tone"
+                  name="lultone"
                   label="Tone"
                   value={formdata.lultone}
                 >
@@ -985,7 +983,7 @@ function ChildCaseHistory() {
                   select
                   fullWidth
                   required
-                  name="power"
+                  name="lulpower"
                   label="Power"
                   value={formdata.lulpower}
                 >
@@ -1001,7 +999,7 @@ function ChildCaseHistory() {
                 <TextField
                   required
                   fullWidth
-                  name="nutrition"
+                  name="lulnutrition"
                   label="Nutrition"
                   value={formdata.lulnutrition}
                 />
@@ -1010,18 +1008,18 @@ function ChildCaseHistory() {
                 <TextField
                   required
                   fullWidth
-                  name="Co-ordination"
+                  name="lulcoordination"
                   label="Co-ordination"
-                  value={formdata.lulCoordination}
+                  value={formdata.lulcoordination}
                 />
               </Grid>
               <Grid item xs={2}>
                 <TextField
                   required
                   fullWidth
-                  name="Abnormal involuntary movement"
+                  name="lulabnormalinvoluntarymovement"
                   label="Abnormal involuntary movement"
-                  value={formdata.lulAbnormalinvoluntarymovement}
+                  value={formdata.lulabnormalinvoluntarymovement}
                 />
               </Grid>
             </>
@@ -1034,7 +1032,7 @@ function ChildCaseHistory() {
                   select
                   required
                   fullWidth
-                  name="tone"
+                  name="llltone"
                   label="Tone"
                   value={formdata.llltone}
                 >
@@ -1049,7 +1047,7 @@ function ChildCaseHistory() {
                   select
                   fullWidth
                   required
-                  name="power"
+                  name="lllpower"
                   label="Power"
                   value={formdata.lllpower}
                 >
@@ -1065,7 +1063,7 @@ function ChildCaseHistory() {
                 <TextField
                   required
                   fullWidth
-                  name="nutrition"
+                  name="lllnutrition"
                   label="Nutrition"
                   value={formdata.lllnutrition}
                 />
@@ -1074,7 +1072,7 @@ function ChildCaseHistory() {
                 <TextField
                   required
                   fullWidth
-                  name="Co-ordination"
+                  name="lllcoordination"
                   label="Co-ordination"
                   value={formdata.lllCoordination}
                 />
@@ -1083,9 +1081,9 @@ function ChildCaseHistory() {
                 <TextField
                   required
                   fullWidth
-                  name="Abnormal involuntary movement"
+                  name="lllabnormalinvoluntarymovement"
                   label="Abnormal involuntary movement"
-                  value={formdata.lllAbnormalinvoluntarymovement}
+                  value={formdata.lllabnormalinvoluntarymovement}
                 />
               </Grid>
             </>
@@ -1152,16 +1150,16 @@ function ChildCaseHistory() {
               <TextField
                 required
                 fullWidth
-                name="General behavior during assessment	"
+                name="generalbehaviourduringassessment"
                 label="General behavior during assessment	"
-                value={formdata.generalbehaviorduringassessment}
+                value={formdata.generalbehaviourduringassessment}
               />
             </Grid>
             <Grid item xs={8}>
               <TextField
                 required
                 fullWidth
-                name="Attention and concentration"
+                name="attentionandconcentration"
                 label="Attention and concentration"
                 value={formdata.attentionandconcentration}
               />
@@ -1170,9 +1168,9 @@ function ChildCaseHistory() {
               <TextField
                 required
                 fullWidth
-                name="Activity level"
+                name="activitylevel"
                 label="Activity level"
-                value={formdata.Aativitylevel}
+                value={formdata.activitylevel}
               />
             </Grid>
             <Grid item xs={8}>
@@ -1188,7 +1186,7 @@ function ChildCaseHistory() {
               <TextField
                 required
                 fullWidth
-                name="Emotionality and behavior"
+                name="emotionalityandbehavior"
                 label="Emotionality and behavior"
                 value={formdata.emotionalityandbehavior}
               />
@@ -1197,11 +1195,13 @@ function ChildCaseHistory() {
               <TextField
                 required
                 fullWidth
-                name="Relationship within/outside family(Significant stressors)"
+                name="relationshipwithinfamily"
                 label="Relationship within/outside family(Significant stressors)"
-                value={formdata.relationshipwithinoutside}
+                value={formdata.relationshipwithinfamily}
               />
             </Grid>
+
+            {/* //store the value into a string of all */}
             <Grid item xs={12}>
               <Typography>Psychological tests used(Please tick)</Typography>
               <FormGroup>
@@ -1285,6 +1285,8 @@ function ChildCaseHistory() {
                 maxRows={5}
               />
             </Grid>
+
+            {/* combine all selection into one string then send to back */}
             <Grid item xs={12}>
               <Typography>Team Recommended for Placement</Typography>
               <FormGroup>
@@ -1321,7 +1323,7 @@ function ChildCaseHistory() {
                 fullWidth
                 name="student"
                 label="Student"
-                value={formdata.child}
+                value={formdata.child} // from selected child
               />
             </Grid>
             <Grid item xs={4}>
@@ -1359,6 +1361,7 @@ function ChildCaseHistory() {
                 fullWidth
               />
             </Grid>
+            {/* today date  */}
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <Grid item xs={12} sm={6}>
                 <DatePicker

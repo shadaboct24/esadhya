@@ -6,27 +6,35 @@ function LogoHeader() {
     <Box
       sx={{
         display: "flex",
-        justifyContent: "space-between",
         alignItems: "center",
+        justifyContent: "center",
         backgroundColor: "#F3F1F1",
         padding: "10px 20px",
-        flexWrap: "nowrap", // Prevent wrapping
         position: "relative",
         zIndex: 1000,
+        gap: 2, // Ensures equal spacing
       }}
     >
       {/* Left Logo */}
       <Box
         sx={{
-          width: 100,
+          width: 100, // Reduce size to match the text height
           height: 100,
-          backgroundImage: `url(${"https://eservices.uk.gov.in/indian-emblem.svg"})`,
-          backgroundSize: "contain",
-          backgroundRepeat: "no-repeat",
-          marginLeft: "10px",
-          flexShrink: 0,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
         }}
-      />
+      >
+        <img
+          src="https://eservices.uk.gov.in/indian-emblem.svg"
+          alt="Left Logo"
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "contain",
+          }}
+        />
+      </Box>
 
       {/* Center Text */}
       <Box
@@ -34,8 +42,10 @@ function LogoHeader() {
           flexGrow: 1,
           display: "flex",
           flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
           textAlign: "center",
-          padding: "0 20px",
+          maxWidth: "50%", // Prevents text from stretching
         }}
       >
         <Typography
@@ -43,8 +53,8 @@ function LogoHeader() {
           sx={{
             color: "black",
             fontWeight: "bold",
-            fontSize: { xs: "18px", sm: "24px", md: "30px" }, // Responsive font size
-            lineHeight: 1.2, // Adjust line height for better spacing
+            fontSize: { xs: "18px", sm: "24px", md: "30px" },
+            lineHeight: 1.2,
           }}
         >
           e-Saadhya - An Adaptable & Accessible e-Learning Framework
@@ -52,7 +62,7 @@ function LogoHeader() {
         <Typography
           variant="body1"
           sx={{
-            fontSize: { xs: "12px", sm: "14px", md: "16px" }, // Responsive font size
+            fontSize: { xs: "12px", sm: "14px", md: "16px" },
             marginTop: "5px",
           }}
         >
@@ -63,15 +73,23 @@ function LogoHeader() {
       {/* Right Logo */}
       <Box
         sx={{
-          width: 100,
+          width: 100, // Match the size of the left logo
           height: 100,
-          backgroundImage: `url(${"Images/esadhya_logo.png"})`,
-          backgroundSize: "contain",
-          backgroundRepeat: "no-repeat",
-          marginRight: "10px",
-          flexShrink: 0, // Prevents the logo from resizing on smaller screens
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
         }}
-      />
+      >
+        <img
+          src="Images/esadhya_logo.png"
+          alt="Right Logo"
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "contain",
+          }}
+        />
+      </Box>
     </Box>
   );
 }

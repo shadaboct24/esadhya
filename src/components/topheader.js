@@ -5,16 +5,17 @@ import LanguageSelector from "./homeCards/languages";
 function TopHeader() {
   return (
     <div
-            style={{
-                backgroundColor: "#3A3838",
-                padding: "10px",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                height:"15px",
-                position:'static',
-                //borderBottom:'1px solid black'
-            }}
+      style={{
+        backgroundColor: "#3A3838",
+        padding: "10px",
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        height: "15px",
+        position: "static",
+        //borderBottom:'1px solid black'
+        // maxWidth: "1500px",
+      }}
     >
       <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
         <a
@@ -23,7 +24,14 @@ function TopHeader() {
         >
           Skip to main content
         </a>
-        <Box sx={{mr: 0,  height: '24px',  borderRight: '1px solid',borderColor: 'grey.300'}}/>
+        <Box
+          sx={{
+            mr: 0,
+            height: "24px",
+            borderRight: "1px solid",
+            borderColor: "grey.300",
+          }}
+        />
         <a
           href="/sitemap"
           style={{ textDecoration: "none", fontSize: "14px", color: "#FFFFFF" }}
@@ -35,10 +43,17 @@ function TopHeader() {
       <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
         <div style={{ display: "flex", alignItems: "center" }}>
           {/* <span style={{ fontSize: "14px", marginRight: "10px", color:'#FFFFFF' }}>English</span> */}
-          <LanguageSelector/>
+          <LanguageSelector />
           {/* <span style={{ fontSize: "14px",color:'#FFFFFF',marginLeft:'10px' }}>हिन्दी</span> */}
         </div>
-        <Box sx={{mr: 0,  height: '24px',  borderRight: '1px solid',borderColor: 'grey.300'}}/>
+        <Box
+          sx={{
+            mr: 0,
+            height: "24px",
+            borderRight: "1px solid",
+            borderColor: "grey.300",
+          }}
+        />
         <div style={{ display: "flex", gap: "10px" }}>
           <button
             style={{
@@ -47,7 +62,7 @@ function TopHeader() {
               backgroundColor: "#007bff",
               color: "white",
               padding: "5px 10px",
-              borderRadius: "4px"
+              borderRadius: "4px",
             }}
           >
             A+
@@ -59,7 +74,7 @@ function TopHeader() {
               backgroundColor: "#007bff",
               color: "white",
               padding: "5px 10px",
-              borderRadius: "4px"
+              borderRadius: "4px",
             }}
           >
             A=
@@ -71,7 +86,7 @@ function TopHeader() {
               backgroundColor: "#007bff",
               color: "white",
               padding: "5px 10px",
-              borderRadius: "4px"
+              borderRadius: "4px",
             }}
           >
             A-
