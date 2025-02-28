@@ -73,11 +73,11 @@ const ISAA = ({ selectedChild }) => {
   useEffect(() => {
     const handleChange = async () => {
       try {
-        setSelectedChildId(selectedChild.id);
+        setSelectedChildId(selectedChild.registrationNo);
         setResponses({});
         setRecommendation("");
         setIsUpdating(false);
-        await checkExistingAssessment(selectedChild.id);
+        await checkExistingAssessment(selectedChild.registrationNo);
       } catch (error) {
         console.log(error);
       }
@@ -135,7 +135,7 @@ const ISAA = ({ selectedChild }) => {
       //   (child) => child.id === selectedChildId
       // );
       const response = await axios.get(
-        `${API_URL}/api/isaa-assessment/generate/${selectedChildId}?childName=${selectedChild.name}`, //chnages it
+        `${API_URL}/api/isaa-assessment/generate/${selectedChildId}?childName=${selectedChild.fullname}`, //chnages it
         { responseType: "blob" }
       );
 
@@ -209,59 +209,32 @@ const ISAA = ({ selectedChild }) => {
         This is Isaa Assessment
       </Typography>
 
-      {/* <FormControl fullWidth>
-        <InputLabel id="child-select-label">Child</InputLabel>
-        <Select
-          labelId="child-select-label"
-          label="Child"
-          value={selectedChildId}
-          onChange={handleChange}
-          disabled={isUpdating}
-        >
-          <MenuItem value="" disabled>
-            Choose a child
-          </MenuItem>
-          {children.map((child) => (
-            <MenuItem key={child.id} value={child.id}>
-              {child.name}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl> */}
-
       {selectedChild && (
         <Grid container spacing={3} sx={{ mt: 3 }}>
-          <Grid item xs={12} md={4}>
-            <Box sx={{ p: 2, border: "1px solid #ddd", borderRadius: "8px" }}>
-              {/* <Typography variant="h6">Details:</Typography>
-              <Typography>Name: {selectedChild.name}</Typography>
-              <Typography>Age: {selectedChild.age}</Typography>
-              <Typography>Grade: {selectedChild.grade}</Typography> */}
-
-              {hasExistingAssessment && !isUpdating && (
-                <Box>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    fullWidth
-                    sx={{ mt: 2 }}
-                    onClick={handleViewReport}
-                  >
-                    View Report
-                  </Button>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    fullWidth
-                    sx={{ mt: 2 }}
-                    onClick={handleUpdate}
-                  >
-                    Update
-                  </Button>
-                </Box>
-              )}
-            </Box>
-          </Grid>
+          {hasExistingAssessment && !isUpdating && (
+            <Grid item xs={12} md={4}>
+              <Box>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  fullWidth
+                  sx={{ mt: 2 }}
+                  onClick={handleViewReport}
+                >
+                  View Report
+                </Button>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  fullWidth
+                  sx={{ mt: 2 }}
+                  onClick={handleUpdate}
+                >
+                  Update
+                </Button>
+              </Box>
+            </Grid>
+          )}
 
           {loading ? (
             <Grid
@@ -278,9 +251,14 @@ const ISAA = ({ selectedChild }) => {
             </Grid>
           ) : (
             (isUpdating || !hasExistingAssessment) && (
-              <Grid item xs={12} md={8}>
+              <Grid item xs={12}>
                 <Box
-                  sx={{ p: 2, border: "1px solid #ddd", borderRadius: "8px" }}
+                  sx={{
+                    p: 2,
+                    border: "1px solid #ddd",
+                    borderRadius: "8px",
+                    alignContent: "center",
+                  }}
                 >
                   {Object.entries(questions).map(
                     ([section, sectionQuestions]) => (

@@ -47,6 +47,9 @@ import ControlPointIcon from "@mui/icons-material/ControlPoint";
 import Modal from "@mui/material/Modal";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
+import axios from "axios";
+import { format } from "date-fns";
+import { API_URL } from "../../Constants/api_url";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -148,18 +151,10 @@ export default function AssessmentChild() {
       ],
     },
   };
-  const children = [
-    { id: 1, name: "Abhishek", age: 7, grade: "2nd Grade" },
-    { id: 2, name: "Babita", age: 9, grade: "4th Grade" },
-    { id: 3, name: "Savita", age: 6, grade: "1st Grade" },
-    { id: 4, name: "Saurabh", age: 8, grade: "3rd Grade" },
-    { id: 5, name: "Shivam", age: 10, grade: "5th Grade" },
-    { id: 6, name: "Shanti", age: 11, grade: "6th Grade" },
-    { id: 7, name: "Simran", age: 12, grade: "7th Grade" },
-    { id: 8, name: "Kavita", age: 13, grade: "8th Grade" },
-    { id: 9, name: "Minal", age: 14, grade: "9th Grade" },
-    { id: 10, name: "Priya", age: 15, grade: "10th Grade" },
-  ];
+  const [children, setChildren] = useState([
+    // { id: 1, name: "Abhishek", age: 7, grade: "2nd Grade" },
+    // { id: 2, name: "Babita", age: 9, grade: "4th Grade" },
+  ]);
 
   const [selectedChild, setSelectedChild] = useState(null);
   const [isChildConfirmed, setIsChildConfirmed] = useState(false);
@@ -167,15 +162,41 @@ export default function AssessmentChild() {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredChildren, setFilteredChildren] = useState(children);
-  const [hoveredRowId, setHoveredRowId] = useState(null);
+  // const [hoveredRowId, setHoveredRowId] = useState(null);
   const [currentSection, setCurrentSection] = useState("child-profiling");
   const [assessmentType, setAssessmentType] = useState("Reinforce");
+
+  const fetchAllChildren = () => {
+    let config = {
+      method: "get",
+      maxBodyLength: Infinity,
+      url: `${API_URL}/api/getallchilddetails`,
+      headers: {},
+      data: JSON.stringify(""),
+    };
+
+    axios
+      .request(config)
+      .then((response) => {
+        setChildren(response.data);
+        setFilteredChildren(response.data);
+        console.log(response.data);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  // Initial fetch when component mounts
+  useEffect(() => {
+    fetchAllChildren();
+  }, []);
 
   useEffect(() => {
     const filtered = children.filter((child) => {
       const searchLower = searchTerm.toLowerCase();
-      const matchesId = child.id.toString().includes(searchTerm);
-      const matchesName = child.name.toLowerCase().includes(searchLower);
+      const matchesId = child.registrationNo.toString().includes(searchTerm);
+      const matchesName = child.fullname.toLowerCase().includes(searchLower);
       return matchesId || matchesName;
     });
     setFilteredChildren(filtered);
@@ -273,7 +294,7 @@ export default function AssessmentChild() {
             <Table sx={{ minWidth: 400 }} aria-label="customized table">
               <TableHead>
                 <TableRow>
-                  <StyledTableCell colSpan={3} sx={{ padding: 1 }}>
+                  <StyledTableCell colSpan={5} sx={{ padding: 1 }}>
                     <SearchTextField
                       size="small"
                       placeholder="Search by ID or Name"
@@ -303,9 +324,13 @@ export default function AssessmentChild() {
                   </StyledTableCell>
                 </TableRow>
                 <TableRow>
-                  <StyledTableCell>Child ID</StyledTableCell>
+                  <StyledTableCell align="left">
+                    Registration No.
+                  </StyledTableCell>
                   <StyledTableCell align="left">Name</StyledTableCell>
-                  <StyledTableCell align="left">Grade</StyledTableCell>
+                  <StyledTableCell align="left">Username</StyledTableCell>
+                  <StyledTableCell align="left">Gender</StyledTableCell>
+                  <StyledTableCell align="left">DOB</StyledTableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -313,7 +338,7 @@ export default function AssessmentChild() {
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((child) => (
                     <StyledTableRow
-                      key={child.id}
+                      key={child.registrationNo}
                       onClick={() => handleRowClick(child)}
                       sx={{
                         "&:hover td": {
@@ -323,12 +348,20 @@ export default function AssessmentChild() {
                         },
                       }}
                     >
-                      <StyledTableCell>{child.id}</StyledTableCell>
-                      <StyledTableCell align="left">
-                        {child.name}
+                      <StyledTableCell align="center">
+                        {child.registrationNo}
                       </StyledTableCell>
                       <StyledTableCell align="left">
-                        {child.grade}
+                        {child.fullname}
+                      </StyledTableCell>
+                      <StyledTableCell align="left">
+                        {child.username}
+                      </StyledTableCell>
+                      <StyledTableCell align="left">
+                        {child.gender}
+                      </StyledTableCell>
+                      <StyledTableCell align="left">
+                        {format(child.dateOfBirth, "dd/MM/yyyy")}
                       </StyledTableCell>
                     </StyledTableRow>
                   ))}
@@ -394,9 +427,6 @@ export default function AssessmentChild() {
                 backgroundColor: "#1e293b",
                 color: "white",
                 borderRadius: "24px",
-                maxHeight: "500px",
-                ml: 2,
-                mt: 2,
               },
             }}
           >
@@ -452,11 +482,13 @@ export default function AssessmentChild() {
               }}
             >
               <Typography variant="body1">
-                Name: {selectedChild.name}
+                Name: {selectedChild.fullname}
               </Typography>
-              <Typography variant="body1">Age: {selectedChild.age}</Typography>
               <Typography variant="body1">
-                Grade: {selectedChild.grade}
+                Gender: {selectedChild.gender}
+              </Typography>
+              <Typography variant="body1">
+                UserName: {selectedChild.username}
               </Typography>
             </Paper>
             <Button

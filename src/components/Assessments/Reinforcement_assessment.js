@@ -61,11 +61,11 @@ const ReinforceAssessment = ({ selectedChild }) => {
   useEffect(() => {
     const handlechange = async () => {
       try {
-        setSelectedChildId(selectedChild.id);
+        setSelectedChildId(selectedChild.registrationNo);
         setResponses({});
         setIsUpdating(false);
         console.log("id is:", selectedChildId);
-        await checkExistingAssessment(selectedChild.id);
+        await checkExistingAssessment(selectedChild.registrationNo);
       } catch (error) {
         console.log(error);
       }
@@ -145,7 +145,7 @@ const ReinforceAssessment = ({ selectedChild }) => {
       //   (child) => child.id === selectedChildId
       // );
       const response = await axios.get(
-        `${API_URL}/api/reinforce-assessments/generate/${selectedChildId}?childName=${selectedChild.name}`, //chnages it
+        `${API_URL}/api/reinforce-assessments/generate/${selectedChildId}?childName=${selectedChild.fullname}`, //chnages it
         { responseType: "blob" }
       );
 
@@ -304,36 +304,29 @@ const ReinforceAssessment = ({ selectedChild }) => {
 
       {selectedChild && (
         <Grid container spacing={3} sx={{ mt: 3 }}>
-          <Grid item xs={12} md={4}>
-            <Box sx={{ p: 2, border: "1px solid #ddd", borderRadius: "8px" }}>
-              {/* <Typography variant="h6">Child Details</Typography>
-              <Typography>Name: {selectedChild.name}</Typography>
-              <Typography>Age: {selectedChild.age}</Typography>
-              <Typography>Grade: {selectedChild.grade}</Typography> */}
-
-              {hasExistingAssessment && !isUpdating && (
-                <Box sx={{ mt: 2 }}>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    fullWidth
-                    onClick={handleViewReport}
-                    sx={{ mb: 2 }}
-                  >
-                    View Report
-                  </Button>
-                  <Button
-                    variant="contained"
-                    color="secondary"
-                    fullWidth
-                    onClick={handleStartUpdate}
-                  >
-                    Update Assessment
-                  </Button>
-                </Box>
-              )}
-            </Box>
-          </Grid>
+          {hasExistingAssessment && !isUpdating && (
+            <Grid item xs={12} md={4}>
+              <Box sx={{ mt: 2 }}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  fullWidth
+                  onClick={handleViewReport}
+                  sx={{ mb: 2 }}
+                >
+                  View Report
+                </Button>
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  fullWidth
+                  onClick={handleStartUpdate}
+                >
+                  Update Assessment
+                </Button>
+              </Box>
+            </Grid>
+          )}
 
           {loading ? (
             <Grid
@@ -349,7 +342,7 @@ const ReinforceAssessment = ({ selectedChild }) => {
               <CircularProgress />
             </Grid>
           ) : !hasExistingAssessment || isUpdating ? (
-            <Grid item xs={12} md={8}>
+            <Grid item xs={12}>
               <Box sx={{ p: 2, border: "1px solid #ddd", borderRadius: "8px" }}>
                 {Object.entries(questions).map(
                   ([section, sectionQuestions]) => (

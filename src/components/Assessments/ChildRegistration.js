@@ -75,7 +75,7 @@ const ChildRegistration = ({ selectedChild, handleClose }) => {
         setLocations(response.data);
         const locat = response.data;
         axios
-          .get(`${API_URL}/api/ischildexist/${selectedChild.id}`)
+          .get(`${API_URL}/api/ischildexist/${selectedChild.registrationNo}`)
           .then((response) => {
             if (response.data) {
               const mappedData = mapBackendToFormData(response.data);

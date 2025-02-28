@@ -105,7 +105,7 @@ function Navbar() {
             </Popover>
           </>
         ) : (
-          <Box sx={{ display: "flex", gap: 2, flexWrap: "nowrap" }}>
+          <Box sx={{ display: "flex", flexWrap: "nowrap" }}>
             {menuItems.map((item, index) => (
               <Button
                 key={index}

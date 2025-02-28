@@ -1,10 +1,10 @@
-import React from 'react';
-import { Box, Typography } from '@mui/material';
+import React from "react";
+import { Box, Typography } from "@mui/material";
 
 const Footer = () => (
-  <Box sx={{ width: '100%', bottom: 0, p: 3, backgroundColor: "transparent" }}>
+  <Box sx={{ bottom: 0, p: 3, backgroundColor: "transparent" }}>
     <Typography variant="body2" color="text.secondary" align="center">
-     Implemented By CDAC Bengaluru
+      Implemented By CDAC Bengaluru
     </Typography>
   </Box>
 );

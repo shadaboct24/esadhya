@@ -1177,7 +1177,7 @@ function ChildCaseHistory() {
               <TextField
                 required
                 fullWidth
-                name="Comprehension"
+                name="comprehension"
                 label="Comprehension"
                 value={formdata.comprehension}
               />

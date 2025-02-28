@@ -1,10 +1,5 @@
 import React from "react";
-import {
-  Box,
-  // useMediaQuery
-} from "@mui/material";
-//import LoginSide from "../login_logout/loginside";
-//import SignupDetails from "./SignupForm";
+import { Box } from "@mui/material";
 import SignupForm from "./SignupForm";
 
 function SignupPage() {
@@ -25,42 +20,7 @@ function SignupPage() {
         boxShadow: "0 4px 12px rgba(0, 0, 0, 1)", // Optional: Shadow for elevation
       }}
     >
-      {/* <Box 
-          sx={{
-            width: '400px',    // Set the desired width for the box
-            height: '400px',   // Set the desired height for the box
-            overflow: 'hidden', // Ensures the image stays within the box
-            //alignItems:'center',
-          }}
-        >
-          <img 
-            src="Images\1729836545435rxtizcqo.webp" 
-            alt="image" 
-            style={{ width: '100%', height: '100%', }} // Adjust the image size
-          />
-     </Box> */}
-
-      <Box>
-        <SignupForm />
-      </Box>
-      {/* Conditionally render image Box based on screen size */}
-      {/* {!isMobile && (
-        <>
-      <Box
-          sx={{
-            width: '1px',          // Line width (thin vertical line)
-            height: '500px',        // Line height (adjust as needed)
-            backgroundColor: 'black', // Line color
-            margin: '0 20px',       // Optional: Margin around the line for spacing
-          }}
-      />
-
-      
-        <Box>
-          <LoginSide/>
-        </Box>
-        </>
-      )} */}
+      <SignupForm />
     </Box>
   );
 }

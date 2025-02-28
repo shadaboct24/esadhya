@@ -69,10 +69,10 @@ const Sensory_assessment = ({ selectedChild }) => {
   useEffect(() => {
     const handleChange = async () => {
       try {
-        setSelectedChildId(selectedChild.id);
+        setSelectedChildId(selectedChild.registrationNo);
         setResponses({});
         setIsUpdating(false);
-        await checkExistingAssessment(selectedChild.id);
+        await checkExistingAssessment(selectedChild.registrationNo);
       } catch (error) {
         console.log(error);
       }
@@ -127,7 +127,7 @@ const Sensory_assessment = ({ selectedChild }) => {
       //   (child) => child.id === selectedChildId
       // );
       const response = await axios.get(
-        `${API_URL}/api/pdf/generate/${selectedChildId}?childName=${selectedChild.name}`,
+        `${API_URL}/api/pdf/generate/${selectedChildId}?childName=${selectedChild.fullname}`,
         { responseType: "blob" }
       );
 
@@ -226,37 +226,30 @@ const Sensory_assessment = ({ selectedChild }) => {
 
       {selectedChild && (
         <Grid container spacing={3} sx={{ mt: 3 }}>
-          <Grid item xs={12} md={4}>
-            <Box sx={{ p: 2, border: "1px solid #ddd", borderRadius: "8px" }}>
-              {/* <Typography variant="h6">Details:</Typography>
-              <Typography>Name: {selectedChild.name}</Typography>
-              <Typography>Age: {selectedChild.age}</Typography>
-              <Typography>Grade: {selectedChild.grade}</Typography> */}
-
-              {hasExistingAssessment && !isUpdating && (
-                <Box>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    fullWidth
-                    sx={{ mt: 2 }}
-                    onClick={handleViewReport}
-                  >
-                    View Report
-                  </Button>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    fullWidth
-                    sx={{ mt: 2 }}
-                    onClick={handleUpdate}
-                  >
-                    Update
-                  </Button>
-                </Box>
-              )}
-            </Box>
-          </Grid>
+          {hasExistingAssessment && !isUpdating && (
+            <Grid item xs={12} md={4}>
+              <Box>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  fullWidth
+                  sx={{ mt: 2 }}
+                  onClick={handleViewReport}
+                >
+                  View Report
+                </Button>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  fullWidth
+                  sx={{ mt: 2 }}
+                  onClick={handleUpdate}
+                >
+                  Update
+                </Button>
+              </Box>
+            </Grid>
+          )}
 
           {loading ? (
             <Grid
@@ -273,7 +266,7 @@ const Sensory_assessment = ({ selectedChild }) => {
             </Grid>
           ) : (
             (isUpdating || !hasExistingAssessment) && (
-              <Grid item xs={12} md={8}>
+              <Grid item xs={12}>
                 <Box
                   sx={{ p: 2, border: "1px solid #ddd", borderRadius: "8px" }}
                 >
