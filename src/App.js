@@ -19,6 +19,7 @@ import SensoryScreening from "./components/Assessments/Sensory_Screening_Checkli
 import ISAA from "./components/Assessments/ISAA";
 import Reinforce_assessment from "./components/Assessments/Reinforcement_assessment";
 import Assessment_child from "./components/Assessments/Assessment_child";
+import PrivateRoute from "./components/PrivateRoute/PrivateRoute";
 
 function App() {
   return (
@@ -28,7 +29,6 @@ function App() {
       <LogoHeader />
       <Navbar />
 
-      {/* <div className="scrollable-container"> */}
       <Routes>
         <Route index element={<Home />} />
         <Route path="/signin" element={<LoginPage />} />
@@ -39,14 +39,15 @@ function App() {
         <Route path="/newreg" element={<NewAdmission />} />
         <Route path="/forgotpassword" element={<ForgotPassword />} />
         <Route path="/profile" element={<UserProfile />} />
-        <Route path="/sensoryscreening" element={<SensoryScreening />} />
+        {/* <Route path="/sensoryscreening" element={<SensoryScreening />} />
         <Route path="/isaa" element={<ISAA />} />
-        <Route path="/reinforce" element={<Reinforce_assessment />} />
-        <Route path="/assessment_child" element={<Assessment_child />} />
+        <Route path="/reinforce" element={<Reinforce_assessment />} /> */}
+        <Route element={<PrivateRoute />}>
+          <Route path="/assessment_child" element={<Assessment_child />} />
+        </Route>
       </Routes>
 
       <Footer />
-      {/* </div> */}
     </BrowserRouter>
   );
 }

@@ -703,12 +703,14 @@ const ResponsiveForm = () => {
                 value={formData.role}
                 onChange={handleInputChange}
               >
-                <MenuItem value="SpecialE">Special educator</MenuItem>
+                <MenuItem value="SpecialEducator">Special educator</MenuItem>
                 <MenuItem value="Supervisor">Supervisor</MenuItem>
-                <MenuItem value="MedicalO">Medical officer</MenuItem>
-                <MenuItem value="Psy">Psychologist</MenuItem>
-                <MenuItem value="ClinicalA">Clinical Assistant</MenuItem>
-                <MenuItem value="Sclp">School Parent</MenuItem>
+                <MenuItem value="MedicalOfficer">Medical officer</MenuItem>
+                <MenuItem value="Psychologist">Psychologist</MenuItem>
+                <MenuItem value="ClinicalAssistant">
+                  Clinical Assistant
+                </MenuItem>
+                <MenuItem value="School Parent">School Parent</MenuItem>
               </Select>
               <FormHelperText>{formerrors.role}</FormHelperText>
             </FormControl>

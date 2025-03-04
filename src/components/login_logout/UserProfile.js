@@ -8,7 +8,7 @@ const UserProfile = () => {
 
   useEffect(() => {
     // Retrieve user data from localStorage
-    const userData = JSON.parse(localStorage.getItem("user"));
+    const userData = JSON.parse(localStorage.getItem("token"));
     if (userData) {
       setUser(userData);
     } else {
@@ -19,7 +19,7 @@ const UserProfile = () => {
 
   const handleLogout = () => {
     // Clear user data from localStorage
-    localStorage.removeItem("user");
+    localStorage.removeItem("token");
     // Redirect to login page
     navigate("/signin");
   };

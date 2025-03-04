@@ -17,6 +17,7 @@ import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import axios from "axios";
 import { API_URL } from "../../Constants/api_url";
+import { jwtDecode } from "jwt-decode";
 
 const LoginDetails = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -51,8 +52,12 @@ const LoginDetails = () => {
 
       if (userData) {
         // Store user data in localStorage
-        localStorage.setItem("user", JSON.stringify(userData));
-        navigate("/profile"); // Redirect to profile page
+        localStorage.setItem("token", JSON.stringify(userData.token));
+        localStorage.setItem(
+          "Role",
+          jwtDecode(JSON.parse(localStorage.getItem("token")))?.role
+        );
+        navigate("/"); // Redirect to profile page
       } else {
         setError("Login failed: No user data returned");
       }
