@@ -20,8 +20,12 @@ import ISAA from "./components/Assessments/ISAA";
 import Reinforce_assessment from "./components/Assessments/Reinforcement_assessment";
 import Assessment_child from "./components/Assessments/Assessment_child";
 import PrivateRoute from "./components/PrivateRoute/PrivateRoute";
+import UseAuth from "./components/AuthComponent/UseAuth";
+import useIdleLogout from "./components/AuthComponent/UseIdelLogout";
 
 function App() {
+  UseAuth();
+  useIdleLogout();
   return (
     <BrowserRouter>
       <ToastContainer />
@@ -38,13 +42,14 @@ function App() {
         <Route path="/dashboard" element={<DashboardLayoutBasic />} />
         <Route path="/newreg" element={<NewAdmission />} />
         <Route path="/forgotpassword" element={<ForgotPassword />} />
-        <Route path="/profile" element={<UserProfile />} />
+        {/* <Route path="/profile" element={<UserProfile />} /> */}
         {/* <Route path="/sensoryscreening" element={<SensoryScreening />} />
         <Route path="/isaa" element={<ISAA />} />
         <Route path="/reinforce" element={<Reinforce_assessment />} /> */}
         <Route element={<PrivateRoute />}>
           <Route path="/assessment_child" element={<Assessment_child />} />
         </Route>
+        {/* <Route path="/assessment_child" element={<Assessment_child />} /> */}
       </Routes>
 
       <Footer />

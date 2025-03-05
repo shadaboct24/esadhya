@@ -15,7 +15,8 @@ function LoginPage() {
         alignItems: "center", // Align items vertically
         gap: "60px", // Space between the boxes
         margin: "50px", // Margin from all sides
-        backgroundColor: "rgba(255, 255, 255, 0.3)",
+        backgroundColor: "transparent",
+        backdropFilter: "blur(2px)",
         padding: "20px", // Padding inside the box for spacing
         borderRadius: "12px", // Optional: Add rounded corners
         boxShadow: "0 4px 12px rgba(0, 0, 0, 1)", // Optional: Shadow for elevation

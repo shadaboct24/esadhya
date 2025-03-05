@@ -157,10 +157,18 @@ function Navbar() {
   return (
     <AppBar
       position="static"
-      sx={{ backgroundColor: "#AC8968", alignItems: "center" }}
+      sx={{
+        backgroundColor: "#AC8968",
+        alignItems: "center",
+        justifyItems: "center",
+      }}
     >
       <Toolbar
-        sx={{ width: "100%", maxWidth: 1200, justifyContent: "space-between" }}
+        sx={{
+          width: "100%",
+          maxWidth: 1200,
+          justifyContent: "space-between",
+        }}
       >
         {isMobile ? (
           <>
@@ -193,19 +201,23 @@ function Navbar() {
                       <ListItemText primary={item.text} />
                     </ListItem>
                   ))}
-                  {allowedItems
-                    .map((role) => extraComponent[role])
-                    .filter(Boolean) // Remove null values
-                    .map((item, index) => (
-                      <ListItem
-                        button
-                        key={index}
-                        component={Link}
-                        to={item.path}
-                      >
-                        {item.text}
-                      </ListItem>
-                    ))}
+                  {localStorage.getItem("token") && (
+                    <>
+                      {allowedItems
+                        .map((role) => extraComponent[role])
+                        .filter(Boolean) // Remove null values
+                        .map((item, index) => (
+                          <ListItem
+                            button
+                            key={index}
+                            component={Link}
+                            to={item.path}
+                          >
+                            <ListItemText primary={item.text} />
+                          </ListItem>
+                        ))}
+                    </>
+                  )}
                 </List>
               </Box>
             </Popover>
@@ -218,25 +230,31 @@ function Navbar() {
                 component={Link}
                 to={item.to}
                 sx={buttonStyle}
+                variant="h6"
               >
                 {item.icon}
                 {item.text}
               </Button>
             ))}
-            {allowedItems
-              .map((role) => extraComponent[role])
-              .filter(Boolean) // Remove null values
-              .map((item, index) => (
-                <Button
-                  button
-                  key={index}
-                  component={Link}
-                  to={item.path}
-                  sx={buttonStyle}
-                >
-                  {item.text}
-                </Button>
-              ))}
+            {localStorage.getItem("token") && (
+              <>
+                {allowedItems
+                  .map((role) => extraComponent[role])
+                  .filter(Boolean) // Remove null values
+                  .map((item, index) => (
+                    <Button
+                      button
+                      key={index}
+                      component={Link}
+                      to={item.path}
+                      sx={buttonStyle}
+                      variant="h6"
+                    >
+                      {item.text}
+                    </Button>
+                  ))}
+              </>
+            )}
           </Box>
         )}
 
@@ -287,63 +305,66 @@ function Navbar() {
           </Grid>
         )}
         {/* Profile Icon */}
-        <IconButton
-          color="inherit"
-          onClick={handleClick}
-          aria-controls={open ? "profile-menu" : undefined}
-          aria-haspopup="true"
-          aria-expanded={open ? "true" : undefined}
-        >
-          <AccountCircleIcon sx={{ fontSize: 32 }} />
-        </IconButton>
         {localStorage.getItem("token") && (
-          <Menu
-            id="profile-menu"
-            anchorEl={anchorElProfile}
-            open={openProfile}
-            onClose={handleClose}
-            MenuListProps={{
-              "aria-labelledby": "profile-button",
-            }}
-            anchorOrigin={{
-              vertical: "bottom",
-              horizontal: "right",
-            }}
-            transformOrigin={{
-              vertical: "top",
-              horizontal: "right",
-            }}
-          >
-            <MenuItem onClick={handleProfileClick}>
-              <ListItemIcon>
-                <PersonIcon fontSize="small" />
-              </ListItemIcon>
-              <ListItemText>Profile</ListItemText>
-            </MenuItem>
+          <>
+            <IconButton
+              color="inherit"
+              onClick={handleClick}
+              aria-controls={open ? "profile-menu" : undefined}
+              aria-haspopup="true"
+              aria-expanded={open ? "true" : undefined}
+            >
+              <AccountCircleIcon sx={{ fontSize: 32 }} />
+            </IconButton>
 
-            <MenuItem onClick={handleSettingsClick}>
-              <ListItemIcon>
-                <SettingsIcon fontSize="small" />
-              </ListItemIcon>
-              <ListItemText>Settings</ListItemText>
-            </MenuItem>
+            <Menu
+              id="profile-menu"
+              anchorEl={anchorElProfile}
+              open={openProfile}
+              onClose={handleClose}
+              MenuListProps={{
+                "aria-labelledby": "profile-button",
+              }}
+              anchorOrigin={{
+                vertical: "bottom",
+                horizontal: "right",
+              }}
+              transformOrigin={{
+                vertical: "top",
+                horizontal: "right",
+              }}
+            >
+              <MenuItem onClick={handleProfileClick}>
+                <ListItemIcon>
+                  <PersonIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText>Profile</ListItemText>
+              </MenuItem>
 
-            <MenuItem onClick={handleNotificationsClick}>
-              <ListItemIcon>
-                <NotificationsIcon fontSize="small" />
-              </ListItemIcon>
-              <ListItemText>Notifications</ListItemText>
-            </MenuItem>
+              <MenuItem onClick={handleSettingsClick}>
+                <ListItemIcon>
+                  <SettingsIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText>Settings</ListItemText>
+              </MenuItem>
 
-            <Divider />
+              <MenuItem onClick={handleNotificationsClick}>
+                <ListItemIcon>
+                  <NotificationsIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText>Notifications</ListItemText>
+              </MenuItem>
 
-            <MenuItem onClick={handleLogoutClick}>
-              <ListItemIcon>
-                <LogoutIcon fontSize="small" />
-              </ListItemIcon>
-              <ListItemText>Logout</ListItemText>
-            </MenuItem>
-          </Menu>
+              <Divider />
+
+              <MenuItem onClick={handleLogoutClick}>
+                <ListItemIcon>
+                  <LogoutIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText>Logout</ListItemText>
+              </MenuItem>
+            </Menu>
+          </>
         )}
       </Toolbar>
     </AppBar>
