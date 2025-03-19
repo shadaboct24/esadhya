@@ -11,7 +11,7 @@ const useIdleLogout = () => {
 
     const resetTimer = () => {
       clearTimeout(timeout);
-      timeout = setTimeout(logout, 5 * 60 * 1000); // 5min ideal par logout
+      timeout = setTimeout(logout, 24 * 60 * 60 * 1000); // 5min ideal par logout 5 * 60 * 1000
     };
 
     window.addEventListener("mousemove", resetTimer);

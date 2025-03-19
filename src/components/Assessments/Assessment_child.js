@@ -141,11 +141,11 @@ export default function AssessmentChild() {
     iep: {
       title: "IEP",
       items: [
-        { name: "Lesson Plan", path: "/lesson-plan", icon: <Home /> },
-        { name: "Annual Plan", path: "/annual-plan", icon: <Home /> },
+        { name: "IEP Part-A", path: "/lesson-plan", icon: <Home /> },
+        { name: "IEP Part-B", path: "/annual-plan", icon: <Home /> },
         {
-          name: "Semi Annual Plan",
-          path: "/semi-annual-plan",
+          name: "Subtask for shortterm objective",
+          path: "/subtask for shortterm objective",
           icon: <Home />,
         },
       ],

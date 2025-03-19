@@ -4,6 +4,8 @@ import ISAA from "./ISAA";
 import Sensory_assessment from "./Sensory_Screening_Checklist";
 import ChildRegistration from "./ChildRegistration";
 import ChildCaseHistory from "./ChildCaseHistory";
+import IepPartA from "../../IEP/IepPartA";
+import IepPartB from "../../IEP/IepPartB";
 
 export default function ShowAssessment({
   assessmentType,
@@ -28,6 +30,12 @@ export default function ShowAssessment({
         )}
       {currentSection === "child-profiling" &&
         assessmentType === "Case History" && <ChildCaseHistory />}
+      {currentSection === "iep" && assessmentType === "IEP Part-A" && (
+        <IepPartA selectedChild={selectedChild} />
+      )}
+      {currentSection === "iep" && assessmentType === "IEP Part-B" && (
+        <IepPartB selectedChild={selectedChild} />
+      )}
     </>
   );
 }

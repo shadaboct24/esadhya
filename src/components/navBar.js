@@ -164,11 +164,29 @@ function Navbar() {
       }}
     >
       <Toolbar
-        sx={{
-          width: "100%",
-          maxWidth: 1200,
-          justifyContent: "space-between",
-        }}
+        // sx={{
+        //   width: "100%",
+        //   maxWidth: 1200,
+        //   justifyContent: "space-between",
+        // }}
+        // sx={{
+        //   width: "100%",
+        //   maxWidth: isMobile ? "100%" : 1200,
+        //   justifyContent: "space-between",
+        // }}
+        sx={
+          isMobile
+            ? {
+                width: "100%",
+                maxWidth: 1200,
+                justifyContent: "space-between",
+              }
+            : {
+                // width: "100%",
+                // maxWidth: 1200,
+                justifyContent: "space-between",
+              }
+        }
       >
         {isMobile ? (
           <>
