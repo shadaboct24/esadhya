@@ -18,7 +18,7 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { API_URL } from "../Constants/api_url";
 import axios from "axios";
 
@@ -28,7 +28,10 @@ function IepPartA({ selectedChild }) {
     dateofitp: "",
     mothertounge: "",
     significantinformation: "",
+    associatedcondition: "",
+    referraltoservices: "",
   };
+
   const [formdata, setFormdata] = useState(intialFormState);
   const [errors, setErrors] = useState({});
   const [viewForm, setViewForm] = useState(false);
@@ -36,13 +39,83 @@ function IepPartA({ selectedChild }) {
   const [domain, setDomain] = useState(""); // adding domain
   const [annualgoal, setAnnualGoal] = useState(""); //  adding annual goal
   const [editIndex, setEditIndex] = useState(null);
+  const [isUpdate, setIsUpdate] = useState(false);
+  const [formId, setFormId] = useState("");
 
   const [subGoals, setSubGoals] = useState({});
   const [currentGoalIndex, setCurrentGoalIndex] = useState(null);
   const [subGoalInput, setSubGoalInput] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [receivedShortTermGoals, setReceivedShortTermGoals] = useState({});
+
+  useEffect(() => {
+    setLoading(true);
+    let config = {
+      method: "get",
+      maxBodyLength: Infinity,
+      url: `${API_URL}/api/getiepparta/${registrationNo}`,
+      headers: {},
+    };
+
+    axios
+      .request(config)
+      .then((response) => {
+        if (response.data && Object.keys(response.data).length > 0) {
+          const data = response.data;
+          console.log("Fetched data:", data);
+
+          // Update form data
+          setFormdata({
+            dateofitp: data.dateofitp ? data.dateofitp.split("T")[0] : "", // Format date
+            mothertounge: data.mothertounge || "",
+            significantinformation: data.significantinformation || "",
+            associatedcondition: data.associatedcondition || "",
+            referraltoservices: data.refferaltoservices || "",
+          });
+
+          // Update annual goals
+          if (data.annualGoals && data.annualGoals.length > 0) {
+            setAnnualGoals(
+              data.annualGoals.map((goal) => ({
+                domain: goal.domain,
+                annualgoal: goal.annualGoal,
+              }))
+            );
+
+            // Update subgoals
+            const subGoalsObj = {};
+            data.annualGoals.forEach((goal, index) => {
+              if (
+                goal.shorttermgoal &&
+                Object.keys(goal.shorttermgoal).length > 0
+              ) {
+                subGoalsObj[index] = Object.keys(goal.shorttermgoal);
+                Object.entries(goal.shorttermgoal).forEach(([key, value]) => {
+                  setReceivedShortTermGoals((prv) => ({
+                    ...prv,
+                    [key]: value,
+                  }));
+                });
+              }
+            });
+
+            setSubGoals(subGoalsObj);
+          }
+
+          // Set update flag and form ID
+          setIsUpdate(true);
+          setFormId(data.id || "");
+        }
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.log("Error fetching data:", error);
+        setLoading(false);
+      });
+  }, [registrationNo]); // Only run when registrationNo changes
 
   const validateField = (name, value) => {
-    let error;
+    let error = "";
     switch (name) {
       case "mothertounge":
         error = value.length < 1 ? "Mother Tounge required" : "";
@@ -70,8 +143,6 @@ function IepPartA({ selectedChild }) {
       [name]: value,
     }));
     const error = validateField(name, value);
-
-    //console.log(error.length);
 
     if (error.length > 0) {
       setErrors((preverror) => ({ ...preverror, [name]: error }));
@@ -103,8 +174,8 @@ function IepPartA({ selectedChild }) {
     setDomain("");
     setAnnualGoal("");
     setViewForm(false);
-    console.log(annualGoals);
   };
+
   const handleEditGoal = (index) => {
     setDomain(annualGoals[index].domain);
     setAnnualGoal(annualGoals[index].annualgoal);
@@ -115,6 +186,23 @@ function IepPartA({ selectedChild }) {
   const handleDeleteGoal = (index) => {
     const updatedGoals = annualGoals.filter((_, i) => i !== index);
     setAnnualGoals(updatedGoals);
+
+    // Also update subgoals
+    const updatedSubGoals = { ...subGoals };
+    delete updatedSubGoals[index];
+
+    // Reindex subgoals
+    const newSubGoals = {};
+    Object.keys(updatedSubGoals).forEach((key) => {
+      const numKey = parseInt(key);
+      if (numKey > index) {
+        newSubGoals[numKey - 1] = updatedSubGoals[numKey];
+      } else {
+        newSubGoals[numKey] = updatedSubGoals[numKey];
+      }
+    });
+
+    setSubGoals(newSubGoals);
   };
 
   const handleAddSubGoal = (index) => {
@@ -128,6 +216,7 @@ function IepPartA({ selectedChild }) {
     updatedSubGoals[index].push(subGoalInput);
     setSubGoals(updatedSubGoals);
     setSubGoalInput("");
+    setCurrentGoalIndex(null); // Close the subgoal input after adding
   };
 
   const handleDeleteSubGoal = (index, subIndex) => {
@@ -137,36 +226,44 @@ function IepPartA({ selectedChild }) {
   };
 
   const handlesubmit = () => {
-    if (formdata.dateofitp == null) {
-      let error = validateField("dateofitp", formdata.dateofitp);
-      console.log(error);
-      alert(error);
+    if (!formdata.dateofitp) {
+      alert("Date of ITP is required");
       return;
     }
+
     if (annualGoals.length < 1) {
       alert("Add Annual Goal");
       return;
     }
 
-    // if (subGoals.length < 1 && subGoals.length !== annualGoals.length) {
-    //   alert("Add SubGoals");
-    //   return;
-    // }
+    const formattedgoals = annualGoals.map((goal, index) => {
+      let subgoalPost = {}; // Reset inside map() to avoid shared reference
 
-    const formattedgoals = annualGoals.map((goal, index) => ({
-      domain: goal.domain,
-      annualGoal: goal.annualgoal,
-      shorttermgoal: subGoals[index] || [],
-    }));
+      subGoals[index].forEach((elem) => {
+        subgoalPost[elem] = receivedShortTermGoals?.[elem] ?? false; // Directly add key-value pair
+      });
+
+      return {
+        domain: goal.domain,
+        annualGoal: goal.annualgoal,
+        shorttermgoal: subgoalPost, // No need for `|| []`
+      };
+    });
+
     const data = {
       registrationNo: registrationNo,
       dateofitp: formdata.dateofitp,
       mothertounge: formdata.mothertounge,
       significantinformation: formdata.significantinformation,
       associatedcondition: formdata.associatedcondition,
-      refferaltoservices: formdata.refferaltoservices,
+      refferaltoservices: formdata.referraltoservices,
       annualGoals: formattedgoals,
     };
+
+    // If it's an update, include the ID
+    if (isUpdate && formId) {
+      data.id = formId;
+    }
 
     console.log("data to be sent is", data);
     let config = {
@@ -180,11 +277,21 @@ function IepPartA({ selectedChild }) {
       .request(config)
       .then((response) => {
         console.log(response.data);
+        alert(
+          isUpdate
+            ? "Form updated successfully!"
+            : "Form submitted successfully!"
+        );
       })
       .catch((error) => {
         console.log(error);
+        alert("Error submitting form. Please try again.");
       });
   };
+
+  if (loading) {
+    return <Typography>Loading...</Typography>;
+  }
 
   return (
     <>
@@ -205,17 +312,20 @@ function IepPartA({ selectedChild }) {
           }}
         >
           <CardContent>
+            <Typography variant="h5" gutterBottom>
+              {isUpdate ? "Update IEP Part A" : "Create IEP Part A"}
+            </Typography>
             <Grid container spacing={3}>
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
                   label="Date of Filling ITP"
                   name="dateofitp"
-                  value={formdata.dateofitp || ""} // Ensure it's an empty string if null
+                  value={formdata.dateofitp || ""}
                   onChange={(e) => {
                     setFormdata((prev) => ({
                       ...prev,
-                      dateofitp: e.target.value, // Extract value from event
+                      dateofitp: e.target.value,
                     }));
                   }}
                   type="date"
@@ -227,7 +337,7 @@ function IepPartA({ selectedChild }) {
                   label="Mother tongue/Language(s) Spoken by person with MR/Autism"
                   fullWidth
                   name="mothertounge"
-                  value={formdata.mothertounge}
+                  value={formdata.mothertounge || ""}
                   onChange={handleChange}
                   error={!!errors.mothertounge}
                   helperText={errors.mothertounge}
@@ -238,7 +348,7 @@ function IepPartA({ selectedChild }) {
                   fullWidth
                   label="Significant information about the person with MR/Autism"
                   name="significantinformation"
-                  value={formdata.significantinformation}
+                  value={formdata.significantinformation || ""}
                   onChange={handleChange}
                   error={!!errors.significantinformation}
                   helperText={errors.significantinformation}
@@ -249,7 +359,7 @@ function IepPartA({ selectedChild }) {
                   fullWidth
                   label="Associated Condition if any"
                   name="associatedcondition"
-                  value={formdata.associatedcondition}
+                  value={formdata.associatedcondition || ""}
                   onChange={handleChange}
                   error={!!errors.associatedcondition}
                   helperText={errors.associatedcondition}
@@ -260,7 +370,7 @@ function IepPartA({ selectedChild }) {
                   fullWidth
                   label="Referral to other services"
                   name="referraltoservices"
-                  value={formdata.referraltoservices}
+                  value={formdata.referraltoservices || ""}
                   onChange={handleChange}
                   error={!!errors.referraltoservices}
                   helperText={errors.referraltoservices}
@@ -278,6 +388,9 @@ function IepPartA({ selectedChild }) {
                     variant="contained"
                     onClick={() => {
                       setViewForm(true);
+                      setEditIndex(null);
+                      setDomain("");
+                      setAnnualGoal("");
                     }}
                   >
                     Add
@@ -328,7 +441,7 @@ function IepPartA({ selectedChild }) {
                     <Box
                       sx={{
                         mt: 1,
-                        display: " flex",
+                        display: "flex",
                         justifyContent: "space-between",
                       }}
                     >
@@ -341,7 +454,7 @@ function IepPartA({ selectedChild }) {
                         Cancel
                       </Button>
                       <Button variant="contained" onClick={handleAddGoal}>
-                        Add
+                        {editIndex !== null ? "Update" : "Add"}
                       </Button>
                     </Box>
                   </Box>
@@ -368,11 +481,13 @@ function IepPartA({ selectedChild }) {
                               <Button
                                 variant="contained"
                                 onClick={() => handleEditGoal(index)}
+                                sx={{ mr: 1 }}
                               >
                                 Edit
                               </Button>
                               <Button
                                 variant="contained"
+                                color="error"
                                 onClick={() => handleDeleteGoal(index)}
                               >
                                 Delete
@@ -385,7 +500,10 @@ function IepPartA({ selectedChild }) {
                   </TableContainer>
                 )}
               </Grid>
-              <Grid item xs={12} sm={9}>
+              <Grid item xs={12} sm={12}>
+                {/* <Typography variant="h6" gutterBottom>
+                  Short Term Goals
+                </Typography> */}
                 {annualGoals.map((item, index) => (
                   <Grid key={index} item xs={12} sm={12}>
                     <Box
@@ -394,6 +512,9 @@ function IepPartA({ selectedChild }) {
                         flexDirection: "row",
                         justifyContent: "space-between",
                         m: 1,
+                        p: 1,
+                        border: "1px solid #ddd",
+                        borderRadius: 1,
                       }}
                     >
                       <Typography variant="h6">
@@ -401,37 +522,59 @@ function IepPartA({ selectedChild }) {
                       </Typography>
                       <Button
                         variant="contained"
-                        onClick={() => setCurrentGoalIndex(index)}
-                      >
-                        Add Subgoal
-                      </Button>
-                    </Box>
-                    {subGoals[index]?.map((sub, subIndex) => (
-                      <Box
-                        key={subIndex}
-                        sx={{
-                          display: "flex",
-                          flexDirection: "row",
-                          justifyContent: "space-between",
-                          m: 1,
+                        onClick={() => {
+                          setCurrentGoalIndex(
+                            currentGoalIndex === index ? null : index
+                          );
+                          setSubGoalInput("");
                         }}
                       >
-                        <Typography>{sub}</Typography>
-                        <Button
-                          variant="contained"
-                          onClick={() => handleDeleteSubGoal(index, subIndex)}
-                        >
-                          Delete
-                        </Button>
+                        {currentGoalIndex === index ? "Cancel" : "Add Subgoal"}
+                      </Button>
+                    </Box>
+
+                    {subGoals[index]?.length > 0 && (
+                      <Box sx={{ ml: 3, mb: 2 }}>
+                        <Typography variant="subtitle1">Subgoals:</Typography>
+                        {subGoals[index].map((sub, subIndex) => (
+                          <Box
+                            key={subIndex}
+                            sx={{
+                              display: "flex",
+                              flexDirection: "row",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                              m: 1,
+                              p: 1,
+                              border: "1px solid #eee",
+                              borderRadius: 1,
+                            }}
+                          >
+                            <Typography>{sub}</Typography>
+                            <Button
+                              variant="contained"
+                              color="error"
+                              size="small"
+                              onClick={() =>
+                                handleDeleteSubGoal(index, subIndex)
+                              }
+                            >
+                              Delete
+                            </Button>
+                          </Box>
+                        ))}
                       </Box>
-                    ))}
+                    )}
 
                     {currentGoalIndex === index && (
-                      <Box>
+                      <Box
+                        sx={{ ml: 3, mt: 1, mb: 2, display: "flex", gap: 1 }}
+                      >
                         <TextField
                           label="Subgoal"
                           value={subGoalInput}
                           onChange={(e) => setSubGoalInput(e.target.value)}
+                          fullWidth
                         />
                         <Button
                           variant="contained"
@@ -445,8 +588,8 @@ function IepPartA({ selectedChild }) {
                 ))}
               </Grid>
               <Grid item xs={12} sm={12}>
-                <Button variant="contained" onClick={handlesubmit}>
-                  Submit
+                <Button variant="contained" onClick={handlesubmit} size="large">
+                  {isUpdate ? "Update Form" : "Submit Form"}
                 </Button>
               </Grid>
             </Grid>

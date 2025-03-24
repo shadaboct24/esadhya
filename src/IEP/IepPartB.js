@@ -7,6 +7,7 @@ import {
   InputLabel,
   Select,
   FormControl,
+  Typography,
 } from "@mui/material";
 import { API_URL } from "../Constants/api_url";
 import axios from "axios";
@@ -34,8 +35,12 @@ const IepPartB = ({ selectedChild }) => {
   const [formerror, setFormerror] = useState({});
   const [fetchedData, setFetchedData] = useState(null);
   const [availableShortTermGoals, setAvailableShortTermGoals] = useState([]);
+  const [isUpdate, setIsUpdate] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [completed, setCompleted] = useState(false);
 
   useEffect(() => {
+    setLoading(true);
     setFormdata((prevdata) => ({
       ...prevdata,
       ["registrationNo"]: registrationNo,
@@ -56,25 +61,50 @@ const IepPartB = ({ selectedChild }) => {
         // Extract all short-term goals from the fetched data
         const allShortTermGoals = [];
         response.data.annualGoals.forEach((goal) => {
-          goal.shorttermgoal.forEach((shortGoal) => {
-            allShortTermGoals.push({
-              shortGoal,
-              domain: goal.domain,
-              annualGoal: goal.annualGoal,
-            });
+          Object.entries(goal.shorttermgoal).forEach(([key, value]) => {
+            if (value === false) {
+              // Filter only where value is false
+              allShortTermGoals.push({
+                shortGoal: key, // Short-term goal key
+                domain: goal.domain,
+                annualGoal: goal.annualGoal,
+              });
+            }
           });
         });
-
+        if (allShortTermGoals.length < 1) setCompleted(true);
         setAvailableShortTermGoals(allShortTermGoals);
         setFormdata((prevdata) => ({
           ...prevdata,
           ["dateoffilingitp"]: response.data.dateofitp,
         }));
+        setLoading(false);
       })
       .catch((error) => {
         console.log(error);
+        setLoading(false);
       });
-  }, []);
+
+    //this is for fetching data of irppartB
+    // let config1 = {
+    //   method: "get",
+    //   maxBodyLength: Infinity,
+    //   url: `${API_URL}/api/getieppartb/${registrationNo}`,
+    //   headers: {},
+    // };
+
+    // axios
+    //   .request(config1)
+    //   .then((response) => {
+    //     console.log(JSON.stringify(response.data));
+    //     setFormdata(response.data);
+    //     setLoading(false);
+    //     setIsUpdate(true);
+    //   })
+    //   .catch((error) => {
+    //     console.log(error);
+    //   });
+  }, [registrationNo]);
 
   const validateField = (name, value) => {
     let error = "";
@@ -203,6 +233,11 @@ const IepPartB = ({ selectedChild }) => {
       .request(config)
       .then((response) => {
         console.log(JSON.stringify(response.data));
+        alert(
+          isUpdate
+            ? "Form updated successfully!"
+            : "Form submitted successfully!"
+        );
         setFormdata(initialState);
       })
       .catch((error) => {
@@ -210,8 +245,18 @@ const IepPartB = ({ selectedChild }) => {
       });
   };
 
+  if (loading) {
+    return <Typography>Loading...</Typography>;
+  }
+  if (completed) {
+    return <Typography>All Short Term Goals are Completed</Typography>;
+  }
+
   return (
     <form onSubmit={handleSubmit}>
+      <Typography variant="h5" gutterBottom>
+        {isUpdate ? "Update IEP Part B" : "Create IEP Part B"}
+      </Typography>
       <Grid container spacing={2} sx={{ maxWidth: 800, margin: "auto" }}>
         <Grid item xs={12} sm={6}>
           <TextField
@@ -422,7 +467,7 @@ const IepPartB = ({ selectedChild }) => {
 
         <Grid item xs={12}>
           <Button variant="contained" color="primary" fullWidth type="submit">
-            Finish
+            {isUpdate ? "Update Form" : "Submit Form"}
           </Button>
         </Grid>
       </Grid>

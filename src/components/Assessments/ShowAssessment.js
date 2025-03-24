@@ -6,6 +6,7 @@ import ChildRegistration from "./ChildRegistration";
 import ChildCaseHistory from "./ChildCaseHistory";
 import IepPartA from "../../IEP/IepPartA";
 import IepPartB from "../../IEP/IepPartB";
+import SubtaskManager from "../../IEP/SubtaskManager";
 
 export default function ShowAssessment({
   assessmentType,
@@ -36,6 +37,10 @@ export default function ShowAssessment({
       {currentSection === "iep" && assessmentType === "IEP Part-B" && (
         <IepPartB selectedChild={selectedChild} />
       )}
+      {currentSection === "iep" &&
+        assessmentType === "Subtask for shortterm objective" && (
+          <SubtaskManager selectedChild={selectedChild} />
+        )}
     </>
   );
 }
