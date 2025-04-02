@@ -14,7 +14,7 @@ const theme = createTheme({
   },
 });
 
-const ProgressStepper = ({ setCurrentSection }) => {
+const ProgressStepper = ({ setCurrentSection, setAssessmentType }) => {
   const [activeStep, setActiveStep] = useState(0);
   const chnageProgress = () => {};
   const steps = [
@@ -40,6 +40,7 @@ const ProgressStepper = ({ setCurrentSection }) => {
             onClick={() => {
               setActiveStep(index);
               setCurrentSection(steps[index].label);
+              setAssessmentType("");
             }}
             sx={{
               flex: 1,

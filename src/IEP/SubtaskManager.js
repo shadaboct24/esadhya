@@ -111,11 +111,23 @@ const SubtaskManager = ({ selectedChild }) => {
       .request(config)
       .then((response) => {
         console.log(JSON.stringify(response.data));
+        alert("Subtasks added successfully");
+        setSubtasks([]);
+        setNewSubtask("");
+        setSelectedGoalData({ domain: "", annualgoal: "", shorttermgoal: "" });
       })
       .catch((error) => {
         console.log(error);
       });
   };
+
+  if (allgoals.length < 1) {
+    return (
+      <>
+        <Typography>No Short Term Goal Available</Typography>
+      </>
+    );
+  }
 
   return (
     <Paper
@@ -130,7 +142,7 @@ const SubtaskManager = ({ selectedChild }) => {
         label="Short Term Goal"
         name="shorttermgoal"
         select
-        value={formdata.shorttermgoal || ""}
+        value={selectedgoaldata.shorttermgoal || ""}
         onChange={setselectedgoals}
         fullWidth
         variant="outlined"
@@ -223,7 +235,12 @@ const SubtaskManager = ({ selectedChild }) => {
       <Button
         onClick={handlesubmit}
         variant="contained"
-        style={{ marginBottom: "10px", display: "flex-end" }}
+        style={{
+          marginTop: "10px",
+          marginBottom: "10px",
+          display: "flex",
+          justifyContent: "right",
+        }}
       >
         SUBMIT
       </Button>

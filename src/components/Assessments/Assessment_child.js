@@ -148,6 +148,7 @@ export default function AssessmentChild() {
           path: "/subtask for shortterm objective",
           icon: <Home />,
         },
+        { name: "Task Analysis Record", path: "/lesson-plan", icon: <Home /> },
       ],
     },
   };
@@ -164,7 +165,7 @@ export default function AssessmentChild() {
   const [filteredChildren, setFilteredChildren] = useState(children);
   // const [hoveredRowId, setHoveredRowId] = useState(null);
   const [currentSection, setCurrentSection] = useState("child-profiling");
-  const [assessmentType, setAssessmentType] = useState("Reinforce");
+  const [assessmentType, setAssessmentType] = useState("");
 
   const fetchAllChildren = () => {
     let config = {
@@ -510,7 +511,10 @@ export default function AssessmentChild() {
                 backgroundColor: "background.paper",
               }}
             >
-              <ProgressStepper setCurrentSection={setCurrentSection} />
+              <ProgressStepper
+                setCurrentSection={setCurrentSection}
+                setAssessmentType={setAssessmentType}
+              />
             </Box>
             {/* <ReinforceAssessment selectedChild={selectedChild} /> */}
             <Typography>
