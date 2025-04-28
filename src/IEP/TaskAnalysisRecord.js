@@ -34,6 +34,10 @@ function TaskAnalysisRecord({ selectedChild }) {
   });
   const [currentResponses, setCurrentResponses] = useState({}); // Current session responses
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [candone, setCanDone] = useState(true); // Check if the session can be done or not
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
   // Fetch all goals when component mounts or registrationNo changes
   useEffect(() => {
@@ -65,6 +69,30 @@ function TaskAnalysisRecord({ selectedChild }) {
     if (!registrationNo || !selectedgoaldata.shorttermgoal) return;
 
     console.log("Fetching subtasks for:", selectedgoaldata.shorttermgoal);
+
+    let config = {
+      method: "get",
+      maxBodyLength: Infinity,
+      url: `${API_URL}/api/get/iep/shorttermgoal/completetiondate/${registrationNo}/${selectedgoaldata.shorttermgoal}`,
+      headers: {},
+    };
+
+    axios
+      .request(config)
+      .then((response) => {
+        console.log(JSON.stringify(response.data));
+        const completionDate = new Date(response.data);
+        completionDate.setHours(0, 0, 0, 0); // Set time to midnight for comparison
+        if (today > completionDate) {
+          setCanDone(false);
+        } else {
+          setCanDone(true);
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+
     setLoading(true);
 
     // Reset current responses when goal changes
@@ -283,6 +311,16 @@ function TaskAnalysisRecord({ selectedChild }) {
           readOnly: true, // Make it read-only since it's auto-filled
         }}
       />
+      {!candone && (
+        <>
+          <Typography color="error">
+            The completetion date is expired so can not do any further session.
+          </Typography>
+          <Typography>
+            If you want to update the completetion date GO TO IEP PART-B
+          </Typography>
+        </>
+      )}
 
       {loading ? (
         <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
@@ -313,7 +351,9 @@ function TaskAnalysisRecord({ selectedChild }) {
                         {new Date(session.sessionDate).toLocaleDateString()}
                       </TableCell>
                     ))}
-                    <TableCell align="center">Current Session</TableCell>
+                    {candone && (
+                      <TableCell align="center">Current Session</TableCell>
+                    )}
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -340,27 +380,32 @@ function TaskAnalysisRecord({ selectedChild }) {
                           })}
 
                           {/* Current session input */}
-                          <TableCell align="center">
-                            <TextField
-                              select
-                              value={currentResponses[subtaskId] || ""}
-                              onChange={(e) =>
-                                handleResponseChange(subtaskId, e.target.value)
-                              }
-                              fullWidth
-                              variant="outlined"
-                              size="small"
-                            >
-                              <MenuItem value="">Select</MenuItem>
-                              {["+", "C", "VP", "GP", "MP", "PP"].map(
-                                (option, idx) => (
-                                  <MenuItem key={idx} value={option}>
-                                    {option}
-                                  </MenuItem>
-                                )
-                              )}
-                            </TextField>
-                          </TableCell>
+                          {candone && (
+                            <TableCell align="center">
+                              <TextField
+                                select
+                                value={currentResponses[subtaskId] || ""}
+                                onChange={(e) =>
+                                  handleResponseChange(
+                                    subtaskId,
+                                    e.target.value
+                                  )
+                                }
+                                fullWidth
+                                variant="outlined"
+                                size="small"
+                              >
+                                <MenuItem value="">Select</MenuItem>
+                                {["+", "C", "VP", "GP", "MP", "PP"].map(
+                                  (option, idx) => (
+                                    <MenuItem key={idx} value={option}>
+                                      {option}
+                                    </MenuItem>
+                                  )
+                                )}
+                              </TextField>
+                            </TableCell>
+                          )}
                         </TableRow>
                       );
                     })
@@ -376,14 +421,16 @@ function TaskAnalysisRecord({ selectedChild }) {
             </TableContainer>
           </div>
           <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleSubmitSession}
-              disabled={isSubmitting || subtasks.length === 0}
-            >
-              {isSubmitting ? "Submitting..." : "Submit Session"}
-            </Button>
+            {candone && (
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleSubmitSession}
+                disabled={isSubmitting || subtasks.length === 0}
+              >
+                {isSubmitting ? "Submitting..." : "Submit Session"}
+              </Button>
+            )}
           </Box>
           <Box sx={{ mt: 2, p: 2 }}>
             <Typography fontWeight="bold">Keys :</Typography>

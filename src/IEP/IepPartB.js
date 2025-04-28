@@ -20,6 +20,7 @@ const IepPartB = ({ selectedChild }) => {
     itpno: "",
     dateofprogramming: "",
     dateofevaluation: "",
+    dateofcompletion: "",
     personresponsible: "",
     domain: "",
     shorttermgoal: "",
@@ -125,6 +126,7 @@ const IepPartB = ({ selectedChild }) => {
         break;
       case "dateofprogramming":
       case "dateofevaluation":
+      case "dateofcompletion":
         error = !value ? "Date is required" : "";
         break;
       case "domain":
@@ -364,7 +366,7 @@ const IepPartB = ({ selectedChild }) => {
             onChange={handleChange}
           />
         </Grid>
-        <Grid item xs={12}>
+        <Grid item xs={12} sm={6}>
           <FormControl fullWidth>
             <InputLabel>
               {mode === "create"
@@ -399,6 +401,19 @@ const IepPartB = ({ selectedChild }) => {
               </p>
             )}
           </FormControl>
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <TextField
+            fullWidth
+            label="Date of Completion"
+            type="date"
+            name="dateofcompletion"
+            value={formdata.dateofcompletion}
+            InputLabelProps={{ shrink: true }}
+            error={!!formerror.dateofcompletion}
+            helperText={formerror.dateofcompletion}
+            onChange={handleChange}
+          />
         </Grid>
         <Grid item xs={12} sm={6}>
           <TextField

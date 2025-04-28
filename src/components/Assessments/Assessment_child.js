@@ -149,6 +149,16 @@ export default function AssessmentChild() {
           icon: <Home />,
         },
         { name: "Task Analysis Record", path: "/lesson-plan", icon: <Home /> },
+        {
+          name: "Create Training pacakage",
+          path: "/lesson-plan",
+          icon: <Home />,
+        },
+        {
+          name: "Create Comprehension",
+          path: "/lesson-plan",
+          icon: <Home />,
+        },
       ],
     },
   };

@@ -12,6 +12,8 @@ import { API_URL } from "../../Constants/api_url";
 import axios from "axios";
 import { useState } from "react";
 import TaskAnalysisRecord from "../../IEP/TaskAnalysisRecord";
+import Create_Training_pacakage from "../CAI/Create_Training_pacakage";
+import Create_comprehension from "../CAI/Create_comprehension";
 
 export default function ShowAssessment({
   assessmentType,
@@ -76,6 +78,15 @@ export default function ShowAssessment({
         assessmentType === "Task Analysis Record" && (
           <TaskAnalysisRecord selectedChild={selectedChild} />
         )}
+      {currentSection === "iep" &&
+        assessmentType === "Create Training pacakage" && (
+          <Create_Training_pacakage selectedChild={selectedChild} />
+        )}
+      {currentSection === "iep" &&
+        assessmentType === "Create Comprehension" && (
+          <Create_comprehension selectedChild={selectedChild} />
+        )}
+
       <Dialog
         open={showPdfDialog}
         onClose={() => {
