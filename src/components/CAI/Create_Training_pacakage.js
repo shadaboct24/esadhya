@@ -9,6 +9,7 @@ import {
 import React, { useEffect, useState } from "react";
 import { API_URL } from "../../Constants/api_url";
 import axios from "axios";
+import { jwtDecode } from "jwt-decode";
 
 function Create_Training_Package() {
   const [allsubject, setAllSubject] = useState([]);
@@ -21,6 +22,8 @@ function Create_Training_Package() {
     category: "",
     items: [],
     description: "",
+    moduleid: "MODULE_3",
+    instructorid: "",
   });
 
   // Fetch all subjects on mount
@@ -29,6 +32,18 @@ function Create_Training_Package() {
       .get(`${API_URL}/api/caisubjects/getall`)
       .then((response) => setAllSubject(response.data))
       .catch((error) => console.error(error));
+
+    const token = localStorage.getItem("token");
+    if (token) {
+      const decoded = jwtDecode(JSON.parse(token));
+      const instructorId = decoded?.user;
+      if (instructorId) {
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          instructorid: instructorId,
+        }));
+      }
+    }
   }, []);
 
   // Fetch categories when subject changes
@@ -98,6 +113,34 @@ function Create_Training_Package() {
     // axios.post(`${API_URL}/api/trainingpackages/create`, formdata)
     //   .then(res => console.log('Success:', res.data))
     //   .catch(err => console.error('Error:', err));
+
+    let config = {
+      method: "post",
+      maxBodyLength: Infinity,
+      url: "http://localhost:8082/api/caifuncandlearningmatching/save",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: JSON.stringify(formdata),
+    };
+
+    axios
+      .request(config)
+      .then((response) => {
+        console.log(JSON.stringify(response.data));
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+    setFormData({
+      subject: "",
+      category: "",
+      items: [],
+      description: "",
+      moduleid: "MODULE_3",
+      instructorid: "",
+    });
+    setSelectedImage(""); // Reset selected image after submission
   };
 
   return (

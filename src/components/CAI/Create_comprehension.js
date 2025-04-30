@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Box, Button, TextField, Typography, Paper } from "@mui/material";
 import axios from "axios";
 import { API_URL } from "../../Constants/api_url";
-
+import { jwtDecode } from "jwt-decode";
 const getKeywords = (text) => {
   return [...new Set(text.match(/\b\w+\b/g))]; // basic keyword extraction
 };
@@ -12,7 +12,7 @@ export default function ComprehensionBuilder() {
   const [passages, setPassages] = useState([{ passage: "", image: null }]);
   const [keywords, setKeywords] = useState([]);
   const [wordData, setWordData] = useState({});
-  const [createdId, setCreatedId] = useState(null);
+  const [instructorId, setInstructorId] = useState("");
 
   const handleChangePassage = (index, field, value) => {
     const updated = [...passages];
@@ -32,24 +32,10 @@ export default function ComprehensionBuilder() {
     }
   };
 
-  const handleCreate = async () => {
+  const extractKeywords = () => {
     const fullPassage = passages.map((p) => p.passage).join(" ");
     const allKeywords = getKeywords(fullPassage);
-
-    // Dummy saving: You can loop for multiple image uploads if required
-    const payload = {
-      lessonid: lessonName,
-      srlNo: 1,
-      pictureid: passages[0].image?.name ?? "",
-      passage: fullPassage,
-    };
-
-    const { data } = await axios.post(
-      `${API_URL}/api/comprehension/create`,
-      payload
-    );
     setKeywords(allKeywords);
-    setCreatedId(data.id);
   };
 
   const handleMeaningChange = (word, field, value) => {
@@ -59,21 +45,60 @@ export default function ComprehensionBuilder() {
     }));
   };
 
-  const handleDone = async () => {
-    const meanings = Object.entries(wordData)
-      .map(([k, v]) => `${k}=${v.meaning}`)
-      .join("^");
+  const handleSubmit = async () => {
+    try {
+      // Extract all meanings and sentences from wordData
+      const meanings = Object.entries(wordData)
+        .map(([k, v]) => `${k}=${v.meaning || ""}`)
+        .join("^");
 
-    const sentences = Object.entries(wordData)
-      .map(([k, v]) => `${k}=${v.sentence}`)
-      .join("^");
+      const sentences = Object.entries(wordData)
+        .map(([k, v]) => `${k}=${v.sentence || ""}`)
+        .join("^");
 
-    await axios.put(`${API_URL}/api/comprehension/${createdId}`, {
-      boundaryConditionRangeOrKeywords: meanings,
-      passageModelSentence: sentences,
-    });
+      // Prepare passages array for submission
+      const passagesArray = passages.map((p) => p.passage);
 
-    alert("Comprehension Updated with Meanings & Sentences!");
+      // Image handling - store image file names in the same order as passages
+      const imageFiles = passages.map((p) => p.image?.name || "");
+
+      // Create the payload with all data
+      const payload = {
+        lessonname: lessonName,
+        passages: passagesArray,
+        images: imageFiles,
+        boundaryConditionRangeOrKeywords: meanings,
+        passageModelSentence: sentences,
+        instructorid: instructorId, // The instructor ID is here
+      };
+
+      // Single API call to submit everything
+      // Get token for authorization if needed
+      const token = localStorage.getItem("token");
+      if (token) {
+        const decoded = jwtDecode(JSON.parse(token));
+        const instructorId = decoded?.user;
+        if (instructorId) {
+          payload.instructorid = instructorId;
+          setInstructorId(instructorId);
+        }
+      }
+      const { data } = await axios.post(
+        `${API_URL}/api/comprehension/create`,
+        payload
+      );
+
+      alert("Comprehension created successfully!");
+
+      // Optional: Clear form or redirect after successful submission
+      setLessonName("");
+      setPassages([{ passage: "", image: null }]);
+      setKeywords([]);
+      setWordData({});
+    } catch (error) {
+      console.error("Error submitting comprehension:", error);
+      alert("Error creating comprehension. Please try again.");
+    }
   };
 
   return (
@@ -88,6 +113,7 @@ export default function ComprehensionBuilder() {
 
       {passages.map((item, idx) => (
         <Paper key={idx} sx={{ p: 2, my: 2 }}>
+          <Typography variant="subtitle1">Passage {idx + 1}</Typography>
           <TextField
             label={`Passage ${idx + 1}`}
             fullWidth
@@ -114,10 +140,10 @@ export default function ComprehensionBuilder() {
           Add more passage
         </Button>
         <Button variant="outlined" onClick={removePassage}>
-          Remove the current passage
+          Remove last passage
         </Button>
-        <Button variant="contained" onClick={handleCreate}>
-          Create Comprehension
+        <Button variant="contained" onClick={extractKeywords}>
+          Extract Keywords
         </Button>
       </Box>
 
@@ -144,8 +170,8 @@ export default function ComprehensionBuilder() {
               />
             </Paper>
           ))}
-          <Button variant="contained" onClick={handleDone}>
-            Done
+          <Button variant="contained" onClick={handleSubmit} sx={{ mt: 2 }}>
+            Submit Comprehension
           </Button>
         </Box>
       )}
