@@ -159,6 +159,11 @@ export default function AssessmentChild() {
           path: "/lesson-plan",
           icon: <Home />,
         },
+        {
+          name: "Upload-Content",
+          path: "/lesson-plan",
+          icon: <Home />,
+        },
       ],
     },
   };

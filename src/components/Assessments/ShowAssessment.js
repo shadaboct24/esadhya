@@ -14,6 +14,7 @@ import { useState } from "react";
 import TaskAnalysisRecord from "../../IEP/TaskAnalysisRecord";
 import Create_Training_pacakage from "../CAI/Create_Training_pacakage";
 import Create_comprehension from "../CAI/Create_comprehension";
+import UploadContent from "../Repository/UploadContent";
 
 export default function ShowAssessment({
   assessmentType,
@@ -86,6 +87,9 @@ export default function ShowAssessment({
         assessmentType === "Create Comprehension" && (
           <Create_comprehension selectedChild={selectedChild} />
         )}
+      {currentSection === "iep" && assessmentType === "Upload-Content" && (
+        <UploadContent />
+      )}
 
       <Dialog
         open={showPdfDialog}
