@@ -108,21 +108,75 @@ function FACP({ selectedChild }) {
     }));
   };
 
-  const handleAccordionClick = (panelId, section) => {
+  const fetchsectionid = async (groupid, section) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:8082/api/facp/getsectionId/${groupid}/${section}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching section ID:", error);
+      return null;
+    }
+  };
+
+  const handleAccordionClick = async (panelId, section) => {
     setLoading(true);
     setExpanded(expanded === panelId ? false : panelId);
+    // let config = {
+    //   method: "get",
+    //   maxBodyLength: Infinity,
+    //   url: `${API_URL}/api/facp/getquestionsbygroupandsectionname/${formdata.groupId}/${section}`,
+    //   headers: {},
+    // };
+
+    // axios
+    //   .request(config)
+    //   .then((response) => {
+    //     //console.log(JSON.stringify(response.data));
+    //     setCurrentSection(response.data);
+    //     setLoading(false);
+    //   })
+    //   .catch((error) => {
+    //     console.log(error);
+    //   });
+    const sectionid = await fetchsectionid(formdata.groupId, section);
+    let data = {
+      childId: formdata.childId,
+      groupId: formdata.groupId,
+      year: formdata.year,
+      termName: formdata.termName,
+      sectionId: sectionid,
+      sectionName: section,
+    };
+    console.log("Form Data:", data);
     let config = {
-      method: "get",
+      method: "post",
       maxBodyLength: Infinity,
-      url: `${API_URL}/api/facp/getquestionsbygroupandsectionname/${formdata.groupId}/${section}`,
-      headers: {},
+      url: "http://localhost:8082/api/facp/getquestionorresponses",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: data,
     };
 
     axios
       .request(config)
       .then((response) => {
-        //console.log(JSON.stringify(response.data));
-        setCurrentSection(response.data);
+        if (response.data.message === "questions") {
+          setCurrentSection(response.data.response);
+        } else if (response.data.message === "responses") {
+          // setResponses(response.data.response.responses);
+          setCurrentSection(response.data.questions);
+          const rawResponses = response.data.response.responses;
+
+          const formattedResponses = rawResponses.reduce((acc, curr) => {
+            acc[curr.subsecid] = curr.option;
+            return acc;
+          }, {});
+
+          setResponses(formattedResponses);
+        }
         setLoading(false);
       })
       .catch((error) => {
