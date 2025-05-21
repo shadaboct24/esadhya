@@ -15,6 +15,7 @@ import TaskAnalysisRecord from "../../IEP/TaskAnalysisRecord";
 import Create_Training_pacakage from "../CAI/Create_Training_pacakage";
 import Create_comprehension from "../CAI/Create_comprehension";
 import UploadContent from "../Repository/UploadContent";
+import FACP from "./FACP";
 
 export default function ShowAssessment({
   assessmentType,
@@ -53,6 +54,10 @@ export default function ShowAssessment({
         currentSection === "assessments" && (
           <Sensory_assessment selectedChild={selectedChild} />
         )}
+
+      {assessmentType === "FACP" && currentSection === "assessments" && (
+        <FACP selectedChild={selectedChild} />
+      )}
       {currentSection === "child-profiling" &&
         assessmentType === "Update Child Details" && (
           <ChildRegistration selectedChild={selectedChild} />
