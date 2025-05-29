@@ -1,4 +1,7 @@
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
   Box,
   Button,
   CircularProgress,
@@ -8,11 +11,19 @@ import {
   MenuItem,
   Select,
   Typography,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+  Paper,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { API_URL } from "../../Constants/api_url";
 import { IoSend } from "react-icons/io5";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import DoneIcon from "@mui/icons-material/Done";
 
 // CSS styles
 const styles = {
@@ -79,6 +90,8 @@ function FACP({ selectedChild }) {
   const [currentSection, setCurrentSection] = useState({});
   const [responses, setResponses] = useState({});
   const [loading, setLoading] = useState(false);
+  const [diablequestion, setDisableQuestion] = useState(false);
+  const [tableData, setTableData] = useState({});
   const [formdata, setFormData] = useState({
     childId: "",
     groupId: "",
@@ -100,6 +113,18 @@ function FACP({ selectedChild }) {
 
   const [expanded, setExpanded] = useState(false);
   const [hoveredButton, setHoveredButton] = useState(null);
+
+  useEffect(() => {
+    setFormData({
+      ...formdata,
+      childId: selectedChild.registrationNo,
+    });
+    fetchgroups();
+    fetchyears();
+    fetchterms();
+    setAcademicYears(getAcademicYears());
+    fetchTable();
+  }, []);
 
   const handleResponseChange = (subsecId, value) => {
     setResponses((prev) => ({
@@ -148,6 +173,7 @@ function FACP({ selectedChild }) {
       termName: formdata.termName,
       sectionId: sectionid,
       sectionName: section,
+      academicYears: formdata.academicYears,
     };
     console.log("Form Data:", data);
     let config = {
@@ -165,6 +191,9 @@ function FACP({ selectedChild }) {
       .then((response) => {
         if (response.data.message === "questions") {
           setCurrentSection(response.data.response);
+          setResponses({});
+          setDisableQuestion(false);
+          setLoading(false);
         } else if (response.data.message === "responses") {
           // setResponses(response.data.response.responses);
           setCurrentSection(response.data.questions);
@@ -176,6 +205,7 @@ function FACP({ selectedChild }) {
           }, {});
 
           setResponses(formattedResponses);
+          setDisableQuestion(true);
         }
         setLoading(false);
       })
@@ -183,17 +213,6 @@ function FACP({ selectedChild }) {
         console.log(error);
       });
   };
-
-  useEffect(() => {
-    setFormData({
-      ...formdata,
-      childId: selectedChild.registrationNo,
-    });
-    fetchgroups();
-    fetchyears();
-    fetchterms();
-    setAcademicYears(getAcademicYears());
-  }, []);
 
   const fetchgroups = () => {
     let config = {
@@ -285,6 +304,25 @@ function FACP({ selectedChild }) {
       });
   };
 
+  const fetchTable = () => {
+    let config = {
+      method: "get",
+      maxBodyLength: Infinity,
+      url: `${API_URL}/api/facp/gettabledata/${selectedChild.registrationNo}`,
+      headers: {},
+    };
+
+    axios
+      .request(config)
+      .then((response) => {
+        // console.log(JSON.stringify(response.data));
+        setTableData(response.data);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
   const handlesubmitsection = () => {
     const data = {
       childId: formdata.childId,
@@ -334,6 +372,9 @@ function FACP({ selectedChild }) {
         setExpanded(false);
         setResponses({});
         setCurrentSection({});
+        handlesubmitQuery();
+        setDisableQuestion(true);
+        fetchTable();
       })
       .catch((error) => {
         console.log(error);
@@ -364,124 +405,243 @@ function FACP({ selectedChild }) {
           </Typography>
         </Box>
         {!sectionNames.length > 0 ? (
-          <Box
-            sx={{
-              display: "flex",
-              flexGrow: 1,
-              gap: 4,
-              flexDirection: "row",
-              mt: 2,
-              border: "1px solidrgb(10, 10, 10)",
-              padding: "10px",
-              backgroundColor: "white",
-            }}
-          >
-            <FormControl sx={{ minWidth: "100px" }} variant="standard">
-              <InputLabel id="group-label">Group</InputLabel>
-              <Select
-                labelId="group-label"
-                id="group-select"
-                value={formdata.groupId}
-                onChange={(e) =>
-                  setFormData({ ...formdata, groupId: e.target.value })
-                }
-              >
-                <MenuItem value="">
-                  <em>Select Group</em>
-                </MenuItem>
-                {groups.map((group) => (
-                  <MenuItem key={group.id} value={group.groupName}>
-                    {group.groupName}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            <FormControl sx={{ minWidth: "100px" }} variant="standard">
-              <InputLabel id="year-label">Year</InputLabel>
-              <Select
-                labelId="year-label"
-                id="year-select"
-                value={formdata.year}
-                onChange={(e) =>
-                  setFormData({ ...formdata, year: e.target.value })
-                }
-              >
-                <MenuItem value="">
-                  <em>Select Year</em>
-                </MenuItem>
-                {years.map((year, index) => (
-                  <MenuItem key={index} value={year}>
-                    {year}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            <FormControl sx={{ minWidth: "100px" }} variant="standard">
-              <InputLabel id="term-label">Term</InputLabel>
-              <Select
-                labelId="term-label"
-                id="term-select"
-                value={formdata.termName}
-                onChange={(e) =>
-                  setFormData({ ...formdata, termName: e.target.value })
-                }
-              >
-                <MenuItem value="">
-                  <em>Select Term</em>
-                </MenuItem>
-                {terms.map((term, index) => (
-                  <MenuItem key={index} value={term}>
-                    {term}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            <FormControl sx={{ minWidth: "140px" }} variant="standard">
-              <InputLabel id="term-label">Academic Year</InputLabel>
-              <Select
-                labelId="academicyear-label"
-                id="academicyear-select"
-                value={formdata.academicYears}
-                onChange={(e) =>
-                  setFormData({ ...formdata, academicYears: e.target.value })
-                }
-              >
-                <MenuItem value="">
-                  <em>Select Academic Year</em>
-                </MenuItem>
-                {academicYears.map((year, index) => (
-                  <MenuItem key={index} value={year}>
-                    {year}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+          <>
             <Box
               sx={{
                 display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
+                flexGrow: 1,
+                gap: 4,
+                flexDirection: "row",
+                mt: 2,
+                border: "1px solidrgb(10, 10, 10)",
+                padding: "10px",
+                backgroundColor: "white",
               }}
             >
-              <IconButton
-                onClick={handlesubmitQuery}
-                disableRipple
+              <FormControl sx={{ minWidth: "100px" }} variant="standard">
+                <InputLabel id="group-label">Group</InputLabel>
+                <Select
+                  labelId="group-label"
+                  id="group-select"
+                  value={formdata.groupId}
+                  onChange={(e) =>
+                    setFormData({ ...formdata, groupId: e.target.value })
+                  }
+                >
+                  <MenuItem value="">
+                    <em>Select Group</em>
+                  </MenuItem>
+                  {groups.map((group) => (
+                    <MenuItem key={group.id} value={group.groupName}>
+                      {group.groupName}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              <FormControl sx={{ minWidth: "100px" }} variant="standard">
+                <InputLabel id="year-label">Year</InputLabel>
+                <Select
+                  labelId="year-label"
+                  id="year-select"
+                  value={formdata.year}
+                  onChange={(e) =>
+                    setFormData({ ...formdata, year: e.target.value })
+                  }
+                >
+                  <MenuItem value="">
+                    <em>Select Year</em>
+                  </MenuItem>
+                  {years.map((year, index) => (
+                    <MenuItem key={index} value={year}>
+                      {year}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              <FormControl sx={{ minWidth: "100px" }} variant="standard">
+                <InputLabel id="term-label">Term</InputLabel>
+                <Select
+                  labelId="term-label"
+                  id="term-select"
+                  value={formdata.termName}
+                  onChange={(e) =>
+                    setFormData({ ...formdata, termName: e.target.value })
+                  }
+                >
+                  <MenuItem value="">
+                    <em>Select Term</em>
+                  </MenuItem>
+                  {terms.map((term, index) => (
+                    <MenuItem key={index} value={term}>
+                      {term}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              <FormControl sx={{ minWidth: "140px" }} variant="standard">
+                <InputLabel id="term-label">Academic Year</InputLabel>
+                <Select
+                  labelId="academicyear-label"
+                  id="academicyear-select"
+                  value={formdata.academicYears}
+                  onChange={(e) =>
+                    setFormData({ ...formdata, academicYears: e.target.value })
+                  }
+                >
+                  <MenuItem value="">
+                    <em>Select Academic Year</em>
+                  </MenuItem>
+                  {academicYears.map((year, index) => (
+                    <MenuItem key={index} value={year}>
+                      {year}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <Box
                 sx={{
-                  padding: 0,
-                  backgroundColor: "transparent",
-                  boxShadow: "none",
-                  "&:hover": {
-                    backgroundColor: "transparent",
-                  },
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                 }}
               >
-                <IoSend size={28} />
-              </IconButton>
+                <IconButton
+                  onClick={handlesubmitQuery}
+                  disableRipple
+                  sx={{
+                    padding: 0,
+                    backgroundColor: "transparent",
+                    boxShadow: "none",
+                    "&:hover": {
+                      backgroundColor: "transparent",
+                    },
+                  }}
+                >
+                  <IoSend size={28} />
+                </IconButton>
+              </Box>
             </Box>
-          </Box>
+            {/* table box  */}
+
+            <Box>
+              <Typography
+                sx={{
+                  fontSize: "18px",
+                  fontWeight: "bold",
+                  mt: 2,
+                  mb: 1,
+                }}
+              >
+                Assessment Details
+              </Typography>
+
+              {Object.entries(tableData).map(
+                ([groupName, yearRecords], index) => (
+                  <Accordion key={index}>
+                    <AccordionSummary
+                      expandIcon={<ExpandMoreIcon />}
+                      aria-controls={`panel${index}-content`}
+                      id={`panel${index}-header`}
+                    >
+                      <Typography component="span" sx={{ fontWeight: "bold" }}>
+                        {groupName}
+                      </Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <Paper>
+                        <Table>
+                          <TableHead>
+                            <TableRow>
+                              <TableCell>Year</TableCell>
+                              <TableCell>Academic Year</TableCell>
+                              <TableCell>Entry Level</TableCell>
+                              <TableCell>First Term</TableCell>
+                              <TableCell>Second Term</TableCell>
+                              <TableCell>Third Term</TableCell>
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            {yearRecords.map((record, i) => (
+                              <TableRow key={i}>
+                                <TableCell>{record.year}</TableCell>
+                                <TableCell>
+                                  {record.academicYear || "-"}
+                                </TableCell>
+                                <TableCell
+                                  sx={{
+                                    backgroundColor:
+                                      record.entryLevel === "Pending"
+                                        ? "#ffebee"
+                                        : "transparent",
+                                    color:
+                                      record.thirdTerm === "Pending"
+                                        ? "#c62828"
+                                        : "inherit",
+                                  }}
+                                >
+                                  {record.entryLevel || "-"}
+                                </TableCell>
+                                <TableCell
+                                  sx={{
+                                    backgroundColor:
+                                      record.firstTerm === "Pending"
+                                        ? "#ffebee"
+                                        : "transparent",
+                                    color:
+                                      record.thirdTerm === "Pending"
+                                        ? "#c62828"
+                                        : "inherit",
+                                  }}
+                                >
+                                  {record.firstTerm || "-"}
+                                </TableCell>
+                                <TableCell
+                                  sx={{
+                                    backgroundColor:
+                                      record.secondTerm === "Pending"
+                                        ? "#ffebee"
+                                        : "transparent",
+                                    color:
+                                      record.thirdTerm === "Pending"
+                                        ? "#c62828"
+                                        : "inherit",
+                                  }}
+                                >
+                                  {record.secondTerm || "-"}
+                                </TableCell>
+                                <TableCell
+                                  sx={{
+                                    backgroundColor:
+                                      record.thirdTerm === "Pending"
+                                        ? "#ffebee"
+                                        : "transparent",
+                                    color:
+                                      record.thirdTerm === "Pending"
+                                        ? "#c62828"
+                                        : "inherit",
+                                  }}
+                                >
+                                  {record.thirdTerm || "-"}
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </Paper>
+                    </AccordionDetails>
+                  </Accordion>
+                )
+              )}
+              {Object.keys(tableData).length === 0 && (
+                <Typography sx={{ mt: 2 }}>
+                  Please Start Assessment to view details.
+                </Typography>
+              )}
+            </Box>
+          </>
         ) : (
           <Box sx={{ flexGrow: 1, mt: 2 }}>
             <div>
@@ -493,14 +653,33 @@ function FACP({ selectedChild }) {
                       ...(hoveredButton === index ? styles.buttonHover : {}),
                     }}
                     onClick={() =>
-                      handleAccordionClick(`panel${index}`, section)
+                      handleAccordionClick(`panel${index}`, section.sectionName)
                     }
                     aria-expanded={expanded === `panel${index}`}
                     aria-controls={`panel${index}-content`}
                     onMouseEnter={() => setHoveredButton(index)}
                     onMouseLeave={() => setHoveredButton(null)}
                   >
-                    <span>{section}</span>
+                    <span>{section.sectionName} </span>
+                    {/* place this at end */}
+                    <span
+                      style={{
+                        display: "flex",
+                        alignItems: "flex-end",
+                        justifyContent: "flex-end",
+                        color: "green",
+                        marginLeft: "auto",
+                        marginRight: "10px",
+                        fontSize: "20px",
+                        cursor: "pointer",
+                        // transition: "color 0.3s",
+                        // ...(section.sectionStatus
+                        //   ? { color: "green" }
+                        //   : { color: "red" }),
+                      }}
+                    >
+                      {section.sectionStatus && <DoneIcon />}
+                    </span>
                     <span
                       style={{
                         ...styles.arrow,
@@ -540,6 +719,7 @@ function FACP({ selectedChild }) {
                                     )
                                   }
                                   label="Select Response"
+                                  disabled={diablequestion}
                                 >
                                   <MenuItem value="">Choose an option</MenuItem>
                                   {responseOptions.map((option) => (
@@ -554,22 +734,24 @@ function FACP({ selectedChild }) {
                               </FormControl>
                             </Box>
                           ))}
-                          <Box
-                            sx={{
-                              display: "flex",
-                              gap: 2,
-                              mt: 2,
-                              justifyContent: "flex-end",
-                            }}
-                          >
-                            <Button variant="outlined">cancel</Button>
-                            <Button
-                              variant="contained"
-                              onClick={handlesubmitsection}
+                          {!diablequestion && (
+                            <Box
+                              sx={{
+                                display: "flex",
+                                gap: 2,
+                                mt: 2,
+                                justifyContent: "flex-end",
+                              }}
                             >
-                              Submit
-                            </Button>
-                          </Box>
+                              <Button variant="outlined">cancel</Button>
+                              <Button
+                                variant="contained"
+                                onClick={handlesubmitsection}
+                              >
+                                Submit
+                              </Button>
+                            </Box>
+                          )}
                         </>
                       )}
                     </div>
