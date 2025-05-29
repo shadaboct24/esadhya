@@ -705,35 +705,41 @@ function FACP({ selectedChild }) {
                         </Box>
                       ) : (
                         <>
-                          {currentSection.subsection_details.map((question) => (
-                            <Box key={question.subsecid} mb={2}>
-                              <Typography>{question.subsecname}</Typography>
-                              <FormControl fullWidth sx={{ mt: 1 }}>
-                                <InputLabel>Select Response</InputLabel>
-                                <Select
-                                  value={responses[question.subsecid] || ""}
-                                  onChange={(e) =>
-                                    handleResponseChange(
-                                      question.subsecid,
-                                      e.target.value
-                                    )
-                                  }
-                                  label="Select Response"
-                                  disabled={diablequestion}
-                                >
-                                  <MenuItem value="">Choose an option</MenuItem>
-                                  {responseOptions.map((option) => (
-                                    <MenuItem
-                                      key={option}
-                                      value={option.toLowerCase()}
-                                    >
-                                      {option}
+                          {currentSection.subsection_details.map(
+                            (question, index) => (
+                              <Box key={question.subsecid} mb={2}>
+                                <Typography>
+                                  {index + 1}. {question.subsecname}
+                                </Typography>
+                                <FormControl fullWidth sx={{ mt: 1 }}>
+                                  <InputLabel>Select Response</InputLabel>
+                                  <Select
+                                    value={responses[question.subsecid] || ""}
+                                    onChange={(e) =>
+                                      handleResponseChange(
+                                        question.subsecid,
+                                        e.target.value
+                                      )
+                                    }
+                                    label="Select Response"
+                                    disabled={diablequestion}
+                                  >
+                                    <MenuItem value="">
+                                      Choose an option
                                     </MenuItem>
-                                  ))}
-                                </Select>
-                              </FormControl>
-                            </Box>
-                          ))}
+                                    {responseOptions.map((option) => (
+                                      <MenuItem
+                                        key={option}
+                                        value={option.toLowerCase()}
+                                      >
+                                        {option}
+                                      </MenuItem>
+                                    ))}
+                                  </Select>
+                                </FormControl>
+                              </Box>
+                            )
+                          )}
                           {!diablequestion && (
                             <Box
                               sx={{
