@@ -20,12 +20,6 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { API_URL } from "../../Constants/api_url";
 
 const Sensory_assessment = ({ selectedChild }) => {
-  const children = [
-    { id: 1, name: "Abhishek", age: 7, grade: "2nd Grade" },
-    { id: 2, name: "Babita", age: 9, grade: "4th Grade" },
-    { id: 3, name: "Savita", age: 6, grade: "1st Grade" },
-  ];
-
   const [selectedChildId, setSelectedChildId] = useState("");
   const [questions, setQuestions] = useState({});
   const [responses, setResponses] = useState({});
@@ -203,26 +197,6 @@ const Sensory_assessment = ({ selectedChild }) => {
         {/* {isUpdating ? "Update Assessment" : "Select a Child"} */}
         This is Sensory Assessment
       </Typography>
-
-      {/* <FormControl fullWidth>
-        <InputLabel id="child-select-label">Child</InputLabel>
-        <Select
-          labelId="child-select-label"
-          label="Child"
-          value={selectedChildId}
-          onChange={handleChange}
-          disabled={isUpdating}
-        >
-          <MenuItem value="" disabled>
-            Choose a child
-          </MenuItem>
-          {children.map((child) => (
-            <MenuItem key={child.id} value={child.id}>
-              {child.name}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl> */}
 
       {selectedChild && (
         <Grid container spacing={3} sx={{ mt: 3 }}>

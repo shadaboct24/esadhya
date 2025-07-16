@@ -57,7 +57,7 @@ const LoginDetails = () => {
           "Role",
           jwtDecode(JSON.parse(localStorage.getItem("token")))?.role
         );
-        navigate("/"); // Redirect to profile page
+        navigate("/assessment_child"); // Redirect to profile page
       } else {
         setError("Login failed: No user data returned");
       }

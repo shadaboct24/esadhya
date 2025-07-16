@@ -925,7 +925,7 @@ const ResponsiveForm = () => {
               >
                 <InputLabel>State</InputLabel>
                 <Select
-                  label="country"
+                  label="State"
                   value={selectedState}
                   onChange={handleStateChange}
                 >

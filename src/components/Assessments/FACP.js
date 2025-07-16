@@ -17,6 +17,9 @@ import {
   TableRow,
   TableCell,
   Paper,
+  TextField,
+  Dialog,
+  DialogContent,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import axios from "axios";
@@ -92,12 +95,20 @@ function FACP({ selectedChild }) {
   const [loading, setLoading] = useState(false);
   const [diablequestion, setDisableQuestion] = useState(false);
   const [tableData, setTableData] = useState({});
+  const [showPdfDialog, setShowPdfDialog] = useState(false);
+  const [pdfUrl, setPdfUrl] = useState(null);
+  //for adding new questions
+  const [newQuestions, setNewQuestions] = useState([]);
+  const [newQuestionText, setNewQuestionText] = useState("");
+  const [showNewQuestionInput, setShowNewQuestionInput] = useState(false);
+
   const [formdata, setFormData] = useState({
     childId: "",
     groupId: "",
     year: "",
     termName: "",
     academicYears: "",
+    recommendations: "",
   });
   const responseOptions = [
     "+=Yes",
@@ -194,6 +205,9 @@ function FACP({ selectedChild }) {
           setResponses({});
           setDisableQuestion(false);
           setLoading(false);
+          setNewQuestionText("");
+          setNewQuestions([]);
+          setFormData({ ...formdata, recommendations: "" });
         } else if (response.data.message === "responses") {
           // setResponses(response.data.response.responses);
           setCurrentSection(response.data.questions);
@@ -206,6 +220,14 @@ function FACP({ selectedChild }) {
 
           setResponses(formattedResponses);
           setDisableQuestion(true);
+          setNewQuestionText("");
+          setNewQuestions([]);
+          setFormData({
+            ...formdata,
+            recommendations:
+              response.data.response.recommendations ||
+              "No recommendations were provided.",
+          });
         }
         setLoading(false);
       })
@@ -331,8 +353,10 @@ function FACP({ selectedChild }) {
       termName: formdata.termName,
       academicYears: formdata.academicYears,
       sectionId: currentSection.sectionid,
+      recommendations: formdata.recommendations,
       responses: null,
-      noofactivity: currentSection.subsection_details.length,
+      noofactivity:
+        currentSection.subsection_details.length + newQuestions.length,
       score: null,
     };
     //in response only those subsectionid and option which are in curentsection
@@ -342,18 +366,32 @@ function FACP({ selectedChild }) {
         subsecid: question.subsecid,
         option: responses[question.subsecid],
       }));
+
+    const newQuestionResponses = newQuestions
+      .filter((question) => responses[question.subsecid])
+      .map((question) => ({
+        subsecid: question.subsecid,
+        option: responses[question.subsecid],
+      }));
+
+    // Combine both
+    const combinedResponses = [...filteredResponses, ...newQuestionResponses];
     // score will be number of option have +=yes
-    data.score = filteredResponses.filter(
+    data.score = combinedResponses.filter(
       (response) => response.option === "+=yes"
     ).length;
 
     //if number of responses is not equal to number of questions
-    if (filteredResponses.length !== currentSection.subsection_details.length) {
+    if (
+      combinedResponses.length !==
+      currentSection.subsection_details.length + newQuestions.length
+    ) {
       alert("Please answer all questions before submitting the form.");
       return;
     }
 
-    data.responses = filteredResponses;
+    // data.responses = filteredResponses;
+    data.responses = combinedResponses;
     console.log("Form Data:", data);
     let config = {
       method: "post",
@@ -375,6 +413,32 @@ function FACP({ selectedChild }) {
         handlesubmitQuery();
         setDisableQuestion(true);
         fetchTable();
+        setNewQuestionText("");
+        setNewQuestions([]);
+        setShowNewQuestionInput(false);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  const handleviewReport = (groupName, academicYear) => () => {
+    let config = {
+      method: "get",
+      maxBodyLength: Infinity,
+      url: `http://localhost:8082/api/facp/getyearwisereport/${formdata.childId}/${groupName}/${academicYear}`,
+      responseType: "blob", // Important for handling PDF response
+      headers: {},
+    };
+
+    axios
+      .request(config)
+      .then((response) => {
+        console.log(JSON.stringify(response.data));
+        const blob = new Blob([response.data], { type: "application/pdf" });
+        const url = URL.createObjectURL(blob);
+        setPdfUrl(url);
+        setShowPdfDialog(true);
       })
       .catch((error) => {
         console.log(error);
@@ -561,6 +625,7 @@ function FACP({ selectedChild }) {
                               <TableCell>First Term</TableCell>
                               <TableCell>Second Term</TableCell>
                               <TableCell>Third Term</TableCell>
+                              <TableCell>Report</TableCell>
                             </TableRow>
                           </TableHead>
                           <TableBody>
@@ -625,6 +690,17 @@ function FACP({ selectedChild }) {
                                   }}
                                 >
                                   {record.thirdTerm || "-"}
+                                </TableCell>
+                                <TableCell>
+                                  <Button
+                                    variant="outlined"
+                                    onClick={handleviewReport(
+                                      groupName,
+                                      record.academicYear
+                                    )}
+                                  >
+                                    Report
+                                  </Button>
                                 </TableCell>
                               </TableRow>
                             ))}
@@ -705,58 +781,138 @@ function FACP({ selectedChild }) {
                         </Box>
                       ) : (
                         <>
-                          {currentSection.subsection_details.map(
-                            (question, index) => (
-                              <Box key={question.subsecid} mb={2}>
-                                <Typography>
-                                  {index + 1}. {question.subsecname}
-                                </Typography>
-                                <FormControl fullWidth sx={{ mt: 1 }}>
-                                  <InputLabel>Select Response</InputLabel>
-                                  <Select
-                                    value={responses[question.subsecid] || ""}
-                                    onChange={(e) =>
-                                      handleResponseChange(
-                                        question.subsecid,
-                                        e.target.value
-                                      )
-                                    }
-                                    label="Select Response"
-                                    disabled={diablequestion}
-                                  >
-                                    <MenuItem value="">
-                                      Choose an option
+                          {[
+                            ...currentSection.subsection_details,
+                            ...newQuestions,
+                          ].map((question, index) => (
+                            <Box key={question.subsecid} mb={2}>
+                              <Typography>
+                                {index + 1}. {question.subsecname}
+                              </Typography>
+                              <FormControl fullWidth sx={{ mt: 1 }}>
+                                <InputLabel>Select Response</InputLabel>
+                                <Select
+                                  value={responses[question.subsecid] || ""}
+                                  onChange={(e) =>
+                                    handleResponseChange(
+                                      question.subsecid,
+                                      e.target.value
+                                    )
+                                  }
+                                  label="Select Response"
+                                  disabled={diablequestion}
+                                >
+                                  <MenuItem value="">Choose an option</MenuItem>
+                                  {responseOptions.map((option) => (
+                                    <MenuItem
+                                      key={option}
+                                      value={option.toLowerCase()}
+                                    >
+                                      {option}
                                     </MenuItem>
-                                    {responseOptions.map((option) => (
-                                      <MenuItem
-                                        key={option}
-                                        value={option.toLowerCase()}
-                                      >
-                                        {option}
-                                      </MenuItem>
-                                    ))}
-                                  </Select>
-                                </FormControl>
-                              </Box>
-                            )
-                          )}
-                          {!diablequestion && (
-                            <Box
-                              sx={{
-                                display: "flex",
-                                gap: 2,
-                                mt: 2,
-                                justifyContent: "flex-end",
-                              }}
-                            >
-                              <Button variant="outlined">cancel</Button>
+                                  ))}
+                                </Select>
+                              </FormControl>
+                            </Box>
+                          ))}
+                          {showNewQuestionInput && (
+                            <Box mb={2}>
+                              <TextField
+                                fullWidth
+                                label="Enter your question"
+                                value={newQuestionText}
+                                onChange={(e) =>
+                                  setNewQuestionText(e.target.value)
+                                }
+                              />
+                              <Button
+                                variant="outlined"
+                                sx={{ mt: 1, mr: 1 }}
+                                onClick={() => {
+                                  setShowNewQuestionInput(false);
+                                  setNewQuestionText("");
+                                  setNewQuestions([]);
+                                  setDisableQuestion(false);
+                                }}
+                              >
+                                Cancel
+                              </Button>
+
                               <Button
                                 variant="contained"
-                                onClick={handlesubmitsection}
+                                sx={{ mt: 1 }}
+                                onClick={() => {
+                                  const trimmedText = newQuestionText.trim();
+                                  if (trimmedText) {
+                                    const newId = `new_${trimmedText}`;
+                                    setNewQuestions((prev) => [
+                                      ...prev,
+                                      {
+                                        subsecid: newId,
+                                        subsecname: trimmedText,
+                                      },
+                                    ]);
+                                    setNewQuestionText("");
+                                    setShowNewQuestionInput(false); // hide input again
+                                  }
+                                }}
                               >
-                                Submit
+                                Submit New Question
                               </Button>
                             </Box>
+                          )}
+                          {!diablequestion && (
+                            <Button
+                              variant="outlined"
+                              sx={{ mb: 2 }}
+                              onClick={() => setShowNewQuestionInput(true)}
+                            >
+                              Add New Question
+                            </Button>
+                          )}
+                          <Box mb={2}>
+                            <TextField
+                              fullWidth
+                              label="Narrate briefly the student's current level of functioning in each area highlighting the emerging skills."
+                              multiline
+                              rows={4}
+                              name="recommendations"
+                              value={formdata.recommendations}
+                              disabled={diablequestion}
+                              onChange={(e) =>
+                                setFormData({
+                                  ...formdata,
+                                  recommendations: e.target.value,
+                                })
+                              }
+                            />
+                          </Box>
+                          {!diablequestion && (
+                            <>
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  gap: 2,
+                                  mt: 2,
+                                  justifyContent: "flex-end",
+                                }}
+                              >
+                                <Button
+                                  variant="outlined"
+                                  onClick={() => {
+                                    setExpanded(false);
+                                  }}
+                                >
+                                  cancel
+                                </Button>
+                                <Button
+                                  variant="contained"
+                                  onClick={handlesubmitsection}
+                                >
+                                  Submit
+                                </Button>
+                              </Box>
+                            </>
                           )}
                         </>
                       )}
@@ -768,6 +924,26 @@ function FACP({ selectedChild }) {
           </Box>
         )}
       </Box>
+
+      <Dialog
+        open={showPdfDialog}
+        onClose={() => {
+          setShowPdfDialog(false);
+          URL.revokeObjectURL(pdfUrl);
+        }}
+        maxWidth="lg"
+        fullWidth
+      >
+        <DialogContent>
+          <iframe
+            src={pdfUrl}
+            width="100%"
+            height="600px"
+            title="Assessment Report"
+            style={{ border: "none" }}
+          />
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
